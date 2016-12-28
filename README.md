@@ -1,7 +1,7 @@
-# TinyFaces-Sketch-Plugin
+# TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin
 
-Fill selected layers in Sketch with avatars and random data...
+Fill layers in Sketch with avatars & random data...
 
 ## Installation
 
-[Install from Sketch Toolbox](http://sketchtoolbox.com/)
+[Install from Sketch Toolbox](http://sketchtoolbox.com/) or [Download and install manually](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/master.zip)
