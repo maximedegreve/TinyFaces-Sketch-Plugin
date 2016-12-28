@@ -12,7 +12,7 @@
       {
       "name" : "Fill with content...",
       "identifier" : "fill",
-      "shortcut" : "",
+      "shortcut" : "ctrl shift a",
       "script" : "fill.js",
       "handler" : "onRun",
       },
