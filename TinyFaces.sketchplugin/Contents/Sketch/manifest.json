@@ -1,0 +1,27 @@
+{
+    "name": "TinyFaces",
+    "description": "Fill content with random avatars & data",
+    "author": "Maxime De Greve",
+    "homepage": "https://tinyfac.es",
+    "version": 1.0,
+    "identifier": "com.maximedegreve.tinyfaces",
+    "updateURL": "https://github.com/downloads/example/sketchplugins/sketchplugins.json",
+    "compatibleVersion": 3,
+    "bundleVersion": 1,
+    "commands" : [
+      {
+      "name" : "Fill with content...",
+      "identifier" : "fill",
+      "shortcut" : "",
+      "script" : "fill.js",
+      "handler" : "onRun",
+      },
+                ],
+    "menu" : {
+        "title": "TinyFaces 👦🏼👨🏾👩🏻",
+        "isRoot": false,
+        "items": [
+          "fill"
+        ]
+    }
+}
