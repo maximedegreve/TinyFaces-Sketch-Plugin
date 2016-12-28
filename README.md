@@ -2,7 +2,7 @@
 
 Fill layers in Sketch with avatars & random data...
 
-![Screengrab](http://lmsotfy.com/so.png)
+![Screengrab](/images/action.gif?raw=true)
 
 ## Installation
 
