@@ -2,6 +2,8 @@
 
 Fill layers in Sketch with avatars & random data...
 
+![Screengrab](/images/action.gif?raw=true)
+
 ## Installation
 
 [Install from Sketch Toolbox](http://sketchtoolbox.com/) or [Download and install manually](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/master.zip)
