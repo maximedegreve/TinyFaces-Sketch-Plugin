@@ -1,6 +1,6 @@
 # TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin
 
-Fill layers in Sketch with avatars & random data...
+Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyfac.es/)...
 
 ![Screengrab](/images/action.gif?raw=true)
 
