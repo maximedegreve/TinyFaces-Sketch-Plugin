@@ -10,7 +10,7 @@
     "bundleVersion": 1,
     "commands" : [
       {
-      "name" : "Fill with content...",
+      "name" : "Fill with avatars & names...",
       "identifier" : "fill",
       "shortcut" : "ctrl shift a",
       "script" : "fill.js",
