@@ -1,7 +1,7 @@
 
 function onRun(context) {
 
-  var selection = context.selection;
+ var selection = context.selection;
  var doc = context.document;
 
  if (selection.length > 0) {
