@@ -2,12 +2,33 @@
 function onRun(context) {
 
   var selection = context.selection;
- var doc = context.document;
+  var doc = context.document;
+  var command = context.command;
+  var identifier = [command identifier];
 
  if (selection.length > 0) {
+
+NSLog("identifier : " + identifier)
+
+   var minQuality = 0
+   var gender = ""
+
+   if (identifier == "fillhigh"){
+     minQuality = 6
+   }
+
+   if (identifier == "fillmale"){
+     gender = "&gender=male"
+   }
+
+   if (identifier == "fillfemale"){
+     gender = "&gender=female"
+   }
+
    var request = [[NSMutableURLRequest alloc] init];
    [request setHTTPMethod:@"GET"];
-   var queryString = "https://tinyfac.es/api/users/";
+   var queryString = "https://tinyfac.es/api/users/?min_quality=" + minQuality + gender;
+   NSLog(queryString)
    [request setURL:[NSURL URLWithString:queryString]];
 
    var error = [[NSError alloc] init];

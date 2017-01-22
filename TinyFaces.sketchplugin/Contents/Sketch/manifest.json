@@ -10,18 +10,44 @@
     "bundleVersion": 1,
     "commands" : [
       {
-      "name" : "Fill with avatars & names...",
-      "identifier" : "fill",
+      "name" : "Fill with high quality...",
+      "identifier" : "fillhigh",
       "shortcut" : "ctrl shift a",
       "script" : "fill.js",
       "handler" : "onRun",
-      },
+      },{
+      "name" : "Fill with low quality...",
+      "identifier" : "filllow",
+      "shortcut" : "ctrl shift t",
+      "script" : "fill.js",
+      "handler" : "onRun",
+      },{
+      "name" : "Fill with female...",
+      "identifier" : "fillfemale",
+      "shortcut" : "ctrl shift f",
+      "script" : "fill.js",
+      "handler" : "onRun",
+      },{
+      "name" : "Fill with male...",
+      "identifier" : "fillmale",
+      "shortcut" : "ctrl shift m",
+      "script" : "fill.js",
+      "handler" : "onRun",
+      }
                 ],
     "menu" : {
         "title": "TinyFaces 👦🏼👨🏾👩🏻",
         "isRoot": false,
         "items": [
-          "fill"
+          "fillhigh",
+          "filllow",
+          {
+                "title": "Filtered",
+                "items": [
+                    "fillmale",
+                    "fillfemale"
+                ]
+            }
         ]
     }
 }
