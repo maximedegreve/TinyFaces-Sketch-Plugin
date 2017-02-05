@@ -95,11 +95,12 @@ function hasDifferentSymbols(layers){
     if (layers[i].className() == "MSSymbolInstance"){
       let uuid = layers[i].symbolMaster().objectID()
       if (seenUUIDs.indexOf(uuid) === -1) {
-          return true
-      } else {
-        seenUUIDs.push(uuid)
+          seenUUIDs.push(uuid)
       }
     }
+  }
+  if (seenUUIDs.length > 1){
+    return true
   }
   return false
 }
