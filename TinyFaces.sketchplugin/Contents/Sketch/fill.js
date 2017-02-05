@@ -5,44 +5,21 @@ function onRun(context) {
   var doc = context.document;
   var command = context.command;
   var identifier = [command identifier];
+  var sketch = context.api()
 
   if (selection.length == 0) {
-    [doc showMessage:"No layer is selected."];
+    sketch.alert("Woops did you forget to select a layer first?", "First select one or more layers and then try again.")
     return;
   }
 
   var minQuality = 0
+  if (identifier == "fillhigh"){ minQuality = 6 }
+
   var gender = ""
+  if (identifier == "fillmale"){ gender = "female"}
+  if (identifier == "fillfemale"){ gender = "male"}
 
-  if (identifier == "fillhigh"){
-    minQuality = 6
-  }
-
-  if (identifier == "fillmale"){
-    gender = "&gender=male"
-  }
-
-  if (identifier == "fillfemale"){
-    gender = "&gender=female"
-  }
-
-  var request = [[NSMutableURLRequest alloc] init];
-  [request setHTTPMethod:@"GET"];
-  var queryString = "https://tinyfac.es/api/users/?min_quality=" + minQuality + gender;
-  [request setURL:[NSURL URLWithString:queryString]];
-
-  var error = [[NSError alloc] init];
-  var responseCode = null;
-
-  var oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:responseCode error:error];
-
-  var dataString = [[NSString alloc] initWithData:oResponseData
-  encoding:NSUTF8StringEncoding];
-
-  var pattern = new RegExp("\\\\'", "g");
-  var validJSONString = dataString.replace(pattern, "'");
-
-  var data = JSON.parse(validJSONString);
+  var data = getRandomData(gender, minQuality)
 
   if (data.length == 0) {
     var message = "Something went wrong getting data from tinyfac.es. Try again later?";
@@ -60,10 +37,45 @@ function onRun(context) {
     namesArray.push(name);
   });
 
+  if(hasDifferentSymbols(selection)){
+    sketch.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.")
+    return
+  }
+
   selection.forEach(function(layer){
     fillLayer(layer, imagesArray, namesArray);
   });
 
+}
+
+function getRandomData(gender, min_quality){
+
+  var genderQuery = ""
+  if (gender == "male"){
+    genderQuery = "&gender=male"
+  } else if (gender == "female"){
+    genderQuery = "&gender=female"
+  }
+
+  var request = [[NSMutableURLRequest alloc] init];
+  [request setHTTPMethod:@"GET"];
+  var queryString = "https://tinyfac.es/api/users/?min_quality=" + min_quality + genderQuery;
+  [request setURL:[NSURL URLWithString:queryString]];
+
+  var error = [[NSError alloc] init];
+  var responseCode = null;
+
+  var oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:responseCode error:error];
+
+  var dataString = [[NSString alloc] initWithData:oResponseData
+  encoding:NSUTF8StringEncoding];
+
+  var pattern = new RegExp("\\\\'", "g");
+  var validJSONString = dataString.replace(pattern, "'");
+
+  var data = JSON.parse(validJSONString);
+
+  return data;
 }
 
 function generateImageData(url){
@@ -77,14 +89,54 @@ function getFirstAndRemoveFromArray(array){
   return value
 }
 
+function hasDifferentSymbols(layers){
+  var seenUUIDs = [];
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].className() == "MSSymbolInstance"){
+      let uuid = layers[i].symbolMaster().objectID()
+      if (seenUUIDs.indexOf(uuid) === -1) {
+          return true
+      } else {
+        seenUUIDs.push(uuid)
+      }
+    }
+  }
+  return false
+}
+
+function filterLayersToOverrideable(layers){
+
+  var possible = [];
+
+  layers.forEach(function(layer){
+    if (layer.className() == "MSTextLayer" || layer.className() == "MSShapeGroup"){
+      possible.push(layer);
+    }
+  });
+
+  return possible;
+
+}
+
 function fillLayer(layer, imagesArray, namesArray){
 
-  if (layer.className() == "MSTextLayer")){
+  if (layer.className() == "MSTextLayer"){
 
     var name = getFirstAndRemoveFromArray(namesArray)
     layer.stringValue = names;
 
   } else if (layer.className() == "MSSymbolInstance"){
+
+    let layersInMaster = layer.symbolMaster().layers()
+    let filtered = filterLayersToOverrideable(layersInMaster)
+
+    var inputs = ["Turn on", "Turn off"];
+
+    var gotInput = sketch.getSelectionFromUser("Turn something on?", inputs, 0);
+    var chosenIndex = gotInput[1]
+
+//  e.addOverrides_forCellAtIndex_ancestorIDs(t, 0, n), s += 1
+
 
     //let layersInSymbol = layer.symbolMaster().layers()
     //log("count")
