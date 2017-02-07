@@ -11,6 +11,7 @@ Features:
 - 💑 Filter to only male or female
 
 Check out how it works:
+
 ![Screengrab](/images/action.gif?raw=true)
 
 ## Installation
