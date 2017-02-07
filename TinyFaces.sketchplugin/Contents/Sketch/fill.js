@@ -42,9 +42,49 @@ function onRun(context) {
     return
   }
 
+  var firstSymbolMaster = getFirstSymbolMaster(selection)
+  var layerOverride;
+  if(firstSymbolMaster){
+    let layer = askForLayerToReplaceInSymbol(firstSymbolMaster, context)
+    layerOverride = layer
+  }
+
   selection.forEach(function(layer){
-    fillLayer(layer, imagesArray, namesArray);
+    fillLayer(layer, imagesArray, namesArray, context, layerOverride);
   });
+
+}
+
+function askForLayerToReplaceInSymbol(master, context){
+
+  let layersInMaster = master.layers();
+  let filtered = filterLayersToOverrideable(layersInMaster);
+  let names = [];
+  for (var i = 0; i < filtered.length; i++) {
+    let name = filtered[i].name();
+    names.push(name);
+  }
+
+  var inputs = names;
+
+  var gotInput = context.api().getSelectionFromUser("What layer would you like to fill with random data?", inputs, 0);
+  var chosenIndex = gotInput[1]
+
+  let targetLayer = filtered[chosenIndex];
+  return targetLayer;
+
+}
+
+function getFirstSymbolMaster(layers){
+
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].className() == "MSSymbolInstance"){
+      let master = layers[i].symbolMaster();
+      return master;
+    }
+  }
+
+  return false;
 
 }
 
@@ -119,7 +159,7 @@ function filterLayersToOverrideable(layers){
 
 }
 
-function fillLayer(layer, imagesArray, namesArray){
+function fillLayer(layer, imagesArray, namesArray, context, layerOverride){
 
   if (layer.className() == "MSTextLayer"){
 
@@ -128,43 +168,32 @@ function fillLayer(layer, imagesArray, namesArray){
 
   } else if (layer.className() == "MSSymbolInstance"){
 
-    let layersInMaster = layer.symbolMaster().layers()
-    let filtered = filterLayersToOverrideable(layersInMaster)
+    if(layerOverride){
 
-    var inputs = ["Turn on", "Turn off"];
+      // get the existing overrides and create a mutable copy of the parts we are interested in changing
+      var existingOverrides = layer.overrides();
+      var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides)
+      mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(existingOverrides.objectForKey(0)),0)
 
-    var gotInput = sketch.getSelectionFromUser("Turn something on?", inputs, 0);
-    var chosenIndex = gotInput[1]
+      // update the mutable dictionary
 
-//  e.addOverrides_forCellAtIndex_ancestorIDs(t, 0, n), s += 1
+      if (layerOverride.className() == "MSShapeGroup")){
 
+        var imageURLString = getFirstAndRemoveFromArray(imagesArray)
+        var imageData = generateImageData(imageURLString)
+        mutableOverrides.objectForKey(0).setObject_forKey(imageData,layerOverride.objectID())
 
-    //let layersInSymbol = layer.symbolMaster().layers()
-    //log("count")
-    //log(layersInSymbol.length);
-    /*
-    for (var i=0; i <= layersInSymbol.length; i++) {
+      } else if (layerOverride.className() == "MSTextLayer"){
 
-      if (layer.className() == "MSShapeGroup")){
-
-
-
-      } else if (layer.className() == "MSShapeGroup")){
-
-        // turn the overrides mutable
-        //var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides);
-
-        // get the first one
-        //var firstOverride = NSMutableDictionary.dictionaryWithDictionary(existingOverrides.objectForKey(0));
-
-        // set the first override to the imageData
-        //var overrideId = [firstOverride allKeys][0];
-        //firstOverride.setObject_forKey(imageData,overrideId)
+        var name = getFirstAndRemoveFromArray(namesArray)
+        mutableOverrides.objectForKey(0).setObject_forKey(name,layerOverride.objectID())
 
       }
 
+      // apply the overrides to the symbol instance
+      layer.applyOverrides_allSymbols_(mutableOverrides,false);
+
     }
-    */
 
   } else if (layer.className() == "MSShapeGroup")){
 
@@ -177,7 +206,7 @@ function fillLayer(layer, imagesArray, namesArray){
   } else if (layer.className() == "MSLayerGroup")){
 
     layer.layers().forEach(function(layer){
-      fillLayer(layer, imagesArray, namesArray)
+      fillLayer(layer, imagesArray, namesArray, context)
     });
 
   }
