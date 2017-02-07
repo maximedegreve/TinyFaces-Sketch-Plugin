@@ -5,76 +5,210 @@ function onRun(context) {
   var doc = context.document;
   var command = context.command;
   var identifier = [command identifier];
+  var sketch = context.api()
 
- if (selection.length > 0) {
+  if (selection.length == 0) {
+    sketch.alert("Woops did you forget to select a layer first?", "First select one or more layers and then try again.")
+    return;
+  }
 
-NSLog("identifier : " + identifier)
+  var minQuality = 0
+  if (identifier == "fillhigh"){ minQuality = 6 }
 
-   var minQuality = 0
-   var gender = ""
+  var gender = ""
+  if (identifier == "fillmale"){ gender = "female"}
+  if (identifier == "fillfemale"){ gender = "male"}
 
-   if (identifier == "fillhigh"){
-     minQuality = 6
-   }
+  var data = getRandomData(gender, minQuality)
 
-   if (identifier == "fillmale"){
-     gender = "&gender=male"
-   }
+  if (data.length == 0) {
+    var message = "Something went wrong getting data from tinyfac.es. Try again later?";
+    [doc showMessage: message];
+    return;
+  }
 
-   if (identifier == "fillfemale"){
-     gender = "&gender=female"
-   }
+  var imagesArray = [];
+  var namesArray = [];
 
-   var request = [[NSMutableURLRequest alloc] init];
-   [request setHTTPMethod:@"GET"];
-   var queryString = "https://tinyfac.es/api/users/?min_quality=" + minQuality + gender;
-   NSLog(queryString)
-   [request setURL:[NSURL URLWithString:queryString]];
+  data.forEach(function(item){
+    var imageURL = item.avatars[2].url;
+    imagesArray.push(imageURL);
+    var name = item.first_name + " " + item.last_name;
+    namesArray.push(name);
+  });
 
-   var error = [[NSError alloc] init];
-   var responseCode = null;
+  if(hasDifferentSymbols(selection)){
+    sketch.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.")
+    return
+  }
 
-   var oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:responseCode error:error];
+  var firstSymbolMaster = getFirstSymbolMaster(selection)
+  var layerOverride;
+  if(firstSymbolMaster){
+    let layer = askForLayerToReplaceInSymbol(firstSymbolMaster, context)
+    layerOverride = layer
+  }
 
-   var dataString = [[NSString alloc] initWithData:oResponseData
-   encoding:NSUTF8StringEncoding];
+  selection.forEach(function(layer){
+    fillLayer(layer, imagesArray, namesArray, context, layerOverride);
+  });
 
-   var pattern = new RegExp("\\\\'", "g");
-   var validJSONString = dataString.replace(pattern, "'");
+}
 
-   var data = JSON.parse(validJSONString);
+function askForLayerToReplaceInSymbol(master, context){
 
-   if (data.length > 0) {
-     for (var i=0; i <= selection.length; i++) {
+  let layersInMaster = master.layers();
+  let filtered = filterLayersToOverrideable(layersInMaster);
+  let names = [];
+  for (var i = 0; i < filtered.length; i++) {
+    let name = filtered[i].name();
+    names.push(name);
+  }
 
-      var layer = [selection objectAtIndex:i];
+  var inputs = names;
 
-      if (layer.className() == "MSTextLayer")){
+  var gotInput = context.api().getSelectionFromUser("What layer would you like to fill with random data?", inputs, 0);
+  var chosenIndex = gotInput[1]
 
-              layer.stringValue = data[i].first_name + " " + data[i].last_name;
+  let targetLayer = filtered[chosenIndex];
+  return targetLayer;
 
-      } else if (layer.className() == "MSShapeGroup")){
+}
 
-              var imageURLString = data[i].avatars[2].url;
-               var url = [[NSURL alloc] initWithString: imageURLString];
+function getFirstSymbolMaster(layers){
 
-               var newImage = [[NSImage alloc] initByReferencingURL:url];
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].className() == "MSSymbolInstance"){
+      let master = layers[i].symbolMaster();
+      return master;
+    }
+  }
 
-               var fill = layer.style().fills().firstObject();
-               fill.setFillType(4);
-               fill.setImage(MSImageData.alloc().initWithImage_convertColorSpace(newImage, false));
-               fill.setPatternFillType(1);
+  return false;
+
+}
+
+function getRandomData(gender, min_quality){
+
+  var genderQuery = ""
+  if (gender == "male"){
+    genderQuery = "&gender=male"
+  } else if (gender == "female"){
+    genderQuery = "&gender=female"
+  }
+
+  var request = [[NSMutableURLRequest alloc] init];
+  [request setHTTPMethod:@"GET"];
+  var queryString = "https://tinyfac.es/api/users/?min_quality=" + min_quality + genderQuery;
+  [request setURL:[NSURL URLWithString:queryString]];
+
+  var error = [[NSError alloc] init];
+  var responseCode = null;
+
+  var oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:responseCode error:error];
+
+  var dataString = [[NSString alloc] initWithData:oResponseData
+  encoding:NSUTF8StringEncoding];
+
+  var pattern = new RegExp("\\\\'", "g");
+  var validJSONString = dataString.replace(pattern, "'");
+
+  var data = JSON.parse(validJSONString);
+
+  return data;
+}
+
+function generateImageData(url){
+  var url = [[NSURL alloc] initWithString: url];
+  var newImage = [[NSImage alloc] initByReferencingURL:url];
+  return MSImageData.alloc().initWithImage_convertColorSpace(newImage, false)
+}
+
+function getFirstAndRemoveFromArray(array){
+  var value = array.splice(0,1)[0];
+  return value
+}
+
+function hasDifferentSymbols(layers){
+  var seenUUIDs = [];
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].className() == "MSSymbolInstance"){
+      let uuid = layers[i].symbolMaster().objectID()
+      if (seenUUIDs.indexOf(uuid) === -1) {
+          seenUUIDs.push(uuid)
+      }
+    }
+  }
+  if (seenUUIDs.length > 1){
+    return true
+  }
+  return false
+}
+
+function filterLayersToOverrideable(layers){
+
+  var possible = [];
+
+  layers.forEach(function(layer){
+    if (layer.className() == "MSTextLayer" || layer.className() == "MSShapeGroup"){
+      possible.push(layer);
+    }
+  });
+
+  return possible;
+
+}
+
+function fillLayer(layer, imagesArray, namesArray, context, layerOverride){
+
+  if (layer.className() == "MSTextLayer"){
+
+    var name = getFirstAndRemoveFromArray(namesArray)
+    layer.stringValue = names;
+
+  } else if (layer.className() == "MSSymbolInstance"){
+
+    if(layerOverride){
+
+      // get the existing overrides and create a mutable copy of the parts we are interested in changing
+      var existingOverrides = layer.overrides();
+      var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides)
+      mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(existingOverrides.objectForKey(0)),0)
+
+      // update the mutable dictionary
+
+      if (layerOverride.className() == "MSShapeGroup")){
+
+        var imageURLString = getFirstAndRemoveFromArray(imagesArray)
+        var imageData = generateImageData(imageURLString)
+        mutableOverrides.objectForKey(0).setObject_forKey(imageData,layerOverride.objectID())
+
+      } else if (layerOverride.className() == "MSTextLayer"){
+
+        var name = getFirstAndRemoveFromArray(namesArray)
+        mutableOverrides.objectForKey(0).setObject_forKey(name,layerOverride.objectID())
+
       }
 
+      // apply the overrides to the symbol instance
+      layer.applyOverrides_allSymbols_(mutableOverrides,false);
 
+    }
 
-     }
-   } else {
-     var message = "No images found tagged with: " + tag;
-     [doc showMessage: message];
-   }
- } else {
-   [doc showMessage:"No layer is selected."];
- }
+  } else if (layer.className() == "MSShapeGroup")){
+
+      var imageURLString = getFirstAndRemoveFromArray(imagesArray)
+      var fill = layer.style().fills().firstObject();
+      fill.setFillType(4);
+      fill.setImage(generateImageData(imageURLString));
+      fill.setPatternFillType(1);
+
+  } else if (layer.className() == "MSLayerGroup")){
+
+    layer.layers().forEach(function(layer){
+      fillLayer(layer, imagesArray, namesArray, context)
+    });
+
+  }
 
 }
