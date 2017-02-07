@@ -57,7 +57,7 @@ function onRun(context) {
 
 function askForLayerToReplaceInSymbol(master, context){
 
-  let layersInMaster = master.layers();
+  let layersInMaster = master.children();
   let filtered = filterLayersToOverrideable(layersInMaster);
   let names = [];
   for (var i = 0; i < filtered.length; i++) {
