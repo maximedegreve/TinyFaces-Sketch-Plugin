@@ -150,8 +150,15 @@ function filterLayersToOverrideable(layers){
   var possible = [];
 
   layers.forEach(function(layer){
-    if (layer.className() == "MSTextLayer" || layer.className() == "MSShapeGroup"){
+    if (layer.className() == "MSTextLayer"){
       possible.push(layer);
+    } else if (layer.className() == "MSShapeGroup"){
+
+      var fills = layer.style().fills();
+      if (fills[0].image()){
+        possible.push(layer);
+      }
+
     }
   });
 
