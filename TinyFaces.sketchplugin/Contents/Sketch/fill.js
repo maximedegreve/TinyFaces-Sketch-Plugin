@@ -171,7 +171,13 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride){
     if(layerOverride){
 
       // get the existing overrides and create a mutable copy of the parts we are interested in changing
-      var existingOverrides = layer.overrides();
+      var values = layer.overrides();
+
+      if (!values){
+          values = NSMutableDictionary.dictionary();
+      }
+
+      var existingOverrides = values;
       var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides)
       mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(existingOverrides.objectForKey(0)),0)
 
