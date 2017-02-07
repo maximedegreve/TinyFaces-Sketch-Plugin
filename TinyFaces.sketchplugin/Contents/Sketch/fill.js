@@ -16,8 +16,8 @@ function onRun(context) {
   if (identifier == "fillhigh"){ minQuality = 6 }
 
   var gender = ""
-  if (identifier == "fillmale"){ gender = "female"}
-  if (identifier == "fillfemale"){ gender = "male"}
+  if (identifier == "fillmale"){ gender = "male"}
+  if (identifier == "fillfemale"){ gender = "female"}
 
   var data = getRandomData(gender, minQuality)
 
