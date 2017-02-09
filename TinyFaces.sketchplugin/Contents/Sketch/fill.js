@@ -45,7 +45,7 @@ function onRun(context) {
   var firstSymbolMaster = getFirstSymbolMaster(selection)
   var layerOverride;
   if(firstSymbolMaster){
-    let layer = askForLayerToReplaceInSymbol(firstSymbolMaster, context)
+    var layer = askForLayerToReplaceInSymbol(firstSymbolMaster, context)
     layerOverride = layer
   }
 
