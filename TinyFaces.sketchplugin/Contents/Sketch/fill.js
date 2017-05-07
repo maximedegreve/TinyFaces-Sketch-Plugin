@@ -164,34 +164,28 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride){
   if (layer.className() == "MSTextLayer"){
 
     var name = getFirstAndRemoveFromArray(namesArray)
-    layer.stringValue = names;
+    layer.stringValue = name;
 
   } else if (layer.className() == "MSSymbolInstance"){
 
     if(layerOverride){
 
-      // get the existing overrides and create a mutable copy of the parts we are interested in changing
-      var existingOverrides = layer.overrides();
-      var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides)
-      mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(existingOverrides.objectForKey(0)),0)
-
-      // update the mutable dictionary
-
       if (layerOverride.className() == "MSShapeGroup")){
 
         var imageURLString = getFirstAndRemoveFromArray(imagesArray)
         var imageData = generateImageData(imageURLString)
-        mutableOverrides.objectForKey(0).setObject_forKey(imageData,layerOverride.objectID())
+        var obj = {};
+        obj[layerOverride.objectID()] = imageData;
+        layer.addOverrides_forCellAtIndex_ancestorIDs_(obj, 0, nil);
 
       } else if (layerOverride.className() == "MSTextLayer"){
 
         var name = getFirstAndRemoveFromArray(namesArray)
-        mutableOverrides.objectForKey(0).setObject_forKey(name,layerOverride.objectID())
+        var obj = {};
+        obj[layerOverride.objectID()] = imageData;
+        layer.addOverrides_forCellAtIndex_ancestorIDs_(obj, 0, nil);
 
       }
-
-      // apply the overrides to the symbol instance
-      layer.applyOverrides_allSymbols_(mutableOverrides,false);
 
     }
 
