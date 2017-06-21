@@ -5,6 +5,7 @@
     "homepage": "https://tinyfac.es",
     "version": 2.1,
     "identifier": "com.maximedegreve.tinyfaces",
+    "appcast": "https://api.sketchpacks.com/v1/plugins/com.maximedegreve.tinyfaces/appcast",
     "updateURL": "https://github.com/downloads/example/sketchplugins/sketchplugins.json",
     "compatibleVersion": 3,
     "bundleVersion": 1,
