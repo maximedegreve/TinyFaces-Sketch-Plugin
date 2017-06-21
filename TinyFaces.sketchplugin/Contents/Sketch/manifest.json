@@ -3,7 +3,7 @@
     "description": "Fill content with random avatars & data",
     "author": "Maxime De Greve",
     "homepage": "https://tinyfac.es",
-    "version": 2.1,
+    "version": 2.2,
     "identifier": "com.maximedegreve.tinyfaces",
     "updateURL": "https://github.com/downloads/example/sketchplugins/sketchplugins.json",
     "compatibleVersion": 3,
