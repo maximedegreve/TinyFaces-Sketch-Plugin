@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin</title>
+    <link>https://raw.githubusercontent.com/maximedegreve/TinyFaces-Sketch-Plugin/master/update/appcast.xml</link>
+    <description>Fill layers in Sketch with avatars and random data from tinyfac.es...</description>
+    <language>en</language>
+      <item>
+        <title>Version 2.2</title>
+        <description>
+          <![CDATA[
+            <ul>
+              <li>Support for Sketch 45 plugin update system.</li>
+            </ul>
+          ]]>
+        </description>
+        <enclosure url="https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/2.2.zip" sparkle:version="2.2" />
+      </item>
+      <item>
+        <title>Version 2.1</title>
+        <description>
+          <![CDATA[
+            <ul>
+            <li>Many fixes for the latest Sketch.</li>
+            </ul>
+          ]]>
+        </description>
+        <enclosure url="https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/2.1.zip" sparkle:version="2.1" />
+      </item>
+      <item>
+        <title>Version 2.0</title>
+        <description>
+          <![CDATA[
+            <ul>
+            <li>Many fixes...</li>
+            </ul>
+          ]]>
+        </description>
+        <enclosure url="https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/2.0.zip" sparkle:version="2.0" />
+      </item>
+  </channel>
+</rss>

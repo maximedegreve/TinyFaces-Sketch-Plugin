@@ -8,6 +8,7 @@
     "updateURL": "https://github.com/downloads/example/sketchplugins/sketchplugins.json",
     "compatibleVersion": 3,
     "bundleVersion": 1,
+    "appcast": "https://raw.githubusercontent.com/maximedegreve/TinyFaces-Sketch-Plugin/master/update/appcast.xml",
     "commands" : [
       {
       "name" : "Fill with high quality...",
