@@ -6,6 +6,17 @@
     <description>Fill layers in Sketch with avatars and random data from tinyfac.es...</description>
     <language>en</language>
       <item>
+        <title>Version 2.3</title>
+        <description>
+          <![CDATA[
+            <ul>
+              <li>Support for Sketch 47.</li>
+            </ul>
+          ]]>
+        </description>
+        <enclosure url="https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/archive/2.3.zip" sparkle:version="2.3" />
+      </item>
+      <item>
         <title>Version 2.2</title>
         <description>
           <![CDATA[
