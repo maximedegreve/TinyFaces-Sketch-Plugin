@@ -188,16 +188,42 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride){
 
         var imageURLString = getFirstAndRemoveFromArray(imagesArray)
         var imageData = generateImageData(imageURLString)
-        var obj = {};
-        obj[layerOverride.objectID()] = imageData;
-        layer.addOverrides_forCellAtIndex_ancestorIDs_(obj, 0, nil);
+
+        // Get existing overrides or make one if none exists
+        var newOverrides = layer.overrides();
+        if (newOverrides == null){
+          newOverrides = {};
+        }
+
+        // Create mutable copy
+		  	var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(newOverrides)
+		  	mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(newOverrides.objectForKey(0)),0)
+
+        // Change item in the overrides
+        mutableOverrides.setObject_forKey(imageData, layerOverride.objectID())
+
+        // Change overrides
+        layer.overrides = mutableOverrides;
 
       } else if (layerOverride.className() == "MSTextLayer"){
 
         var name = getFirstAndRemoveFromArray(namesArray)
-        var obj = {};
-        obj[layerOverride.objectID()] = name;
-        layer.addOverrides_forCellAtIndex_ancestorIDs_(obj, 0, nil);
+
+        // Get existing overrides or make one if none exists
+        var newOverrides = layer.overrides();
+        if (newOverrides == null){
+          newOverrides = {};
+        }
+
+        // Create mutable copy
+		  	var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(newOverrides)
+		  	mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(newOverrides.objectForKey(0)),0)
+
+        // Change item in the overrides
+        mutableOverrides.setObject_forKey(name, layerOverride.objectID())
+
+        // Change overrides
+        layer.overrides = mutableOverrides;
 
       }
 
