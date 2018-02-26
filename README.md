@@ -1,6 +1,4 @@
 # TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin
-[![Download from Sketchpacks.com](https://badges.sketchpacks.com/plugins/com.maximedegreve.tinyfaces/version.svg)](https://api.sketchpacks.com/v1/plugins/com.maximedegreve.tinyfaces/download) [![Compatible Sketch Version](https://badges.sketchpacks.com/plugins/com.maximedegreve.tinyfaces/compatibility.svg)](https://sketchpacks.com/maximedegreve/TinyFaces-Sketch-Plugin)
-
 Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyfac.es/)...
 
 Features:
