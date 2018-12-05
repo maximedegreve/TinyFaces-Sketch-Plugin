@@ -15,25 +15,25 @@
       "identifier" : "fillhigh",
       "shortcut" : "ctrl shift a",
       "script" : "fill.js",
-      "handler" : "onRun",
+      "handler" : "onRun"
       },{
       "name" : "Fill with low quality...",
       "identifier" : "filllow",
       "shortcut" : "ctrl shift t",
       "script" : "fill.js",
-      "handler" : "onRun",
+      "handler" : "onRun"
       },{
       "name" : "Fill with female...",
       "identifier" : "fillfemale",
       "shortcut" : "ctrl shift f",
       "script" : "fill.js",
-      "handler" : "onRun",
+      "handler" : "onRun"
       },{
       "name" : "Fill with male...",
       "identifier" : "fillmale",
       "shortcut" : "ctrl shift m",
       "script" : "fill.js",
-      "handler" : "onRun",
+      "handler" : "onRun"
       }
                 ],
     "menu" : {
