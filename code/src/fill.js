@@ -1,11 +1,10 @@
 import sketch from "sketch";
 // documentation: https://developer.sketchapp.com/reference/api/
 
-export default function() {
+export default function(context) {
   const doc = sketch.getSelectedDocument();
-  const selection = doc.selectedLayers;
 
-  if (selection.length == 0) {
+  if (doc.selectedLayers.length == 0) {
     sketch.UI.message(
       `Something went wrong while contacting tinyfac.es. Try again later?`
     );
@@ -13,21 +12,27 @@ export default function() {
   }
 
   var minQuality = 0;
-  if (identifier == "fillhigh") {
+  if (context.identifier == "fillhigh") {
     minQuality = 6;
   }
 
   var gender = "";
-  if (identifier == "fillmale") {
+  if (context.identifier == "fillmale") {
     gender = "male";
   }
-  if (identifier == "fillfemale") {
+  if (context.identifier == "fillfemale") {
     gender = "female";
   }
 
-  var data = getRandomData(gender, minQuality);
+  getRandomData(gender, minQuality, function(data) {
+    fillSelectionWith(data.json());
+  });
+}
 
-  if (data.length == 0) {
+function fillSelectionWith(data) {
+  console.log(data);
+
+  if (data.length === 0) {
     sketch.UI.message(
       `Something went wrong getting data from tinyfac.es. Try again later?`
     );
@@ -37,7 +42,9 @@ export default function() {
   var imagesArray = [];
   var namesArray = [];
 
-  data.forEach(function(item) {
+  return;
+
+  data.forEach(item => {
     var imageURL = item.avatars[2].url;
     imagesArray.push(imageURL);
     var name = item.first_name + " " + item.last_name;
@@ -45,12 +52,15 @@ export default function() {
   });
 
   if (hasDifferentSymbols(selection)) {
-    sketch.alert(
+    UI.alert(
       "You can't have different types of symbols selected when using this.",
       "Make sure you only have one type of symbol and try again."
     );
     return;
   }
+
+  const doc = sketch.getSelectedDocument();
+  const selection = doc.selectedLayers;
 
   var firstSymbolMaster = getFirstSymbolMaster(selection);
   var layerOverride;
@@ -64,7 +74,7 @@ export default function() {
   });
 }
 
-function askForLayerToReplaceInSymbol(master, context) {
+function askForLayerToReplaceInSymbol(master) {
   let layersInMaster = master.children();
   let filtered = filterLayersToOverrideable(layersInMaster);
   let names = [];
@@ -73,19 +83,16 @@ function askForLayerToReplaceInSymbol(master, context) {
     names.push(name);
   }
 
-  var inputs = names;
+  var selection = UI.getSelectionFromUser(
+    "What layer would you like to fill with random data?",
+    names
+  );
 
-  var gotInput = context
-    .api()
-    .getSelectionFromUser(
-      "What layer would you like to fill with random data?",
-      inputs,
-      0
-    );
-  var chosenIndex = gotInput[1];
-
-  let targetLayer = filtered[chosenIndex];
-  return targetLayer;
+  var ok = selection[2];
+  var value = options[selection[1]];
+  if (ok) {
+    // do something
+  }
 }
 
 function getFirstSymbolMaster(layers) {
@@ -99,37 +106,25 @@ function getFirstSymbolMaster(layers) {
   return false;
 }
 
-function requestWithURL(url) {
-  let request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
-  return NSURLConnection.sendSynchronousRequest_returningResponse_error(
-    request,
-    null,
-    null
-  );
-}
-
-function getRandomData(gender, min_quality) {
+function getRandomData(gender, min_quality, callback) {
   var genderQuery = "";
   if (gender == "male") {
     genderQuery = "&gender=male";
   } else if (gender == "female") {
     genderQuery = "&gender=female";
   }
-  var queryString =
+  var url =
     "https://tinyfac.es/api/users/?min_quality=" + min_quality + genderQuery;
 
-  try {
-    let response = requestWithURL(queryString);
-    if (response) {
-      return response;
-    } else {
-      throw "⚠️ TinyFaces can't be contacted. Check your internet...";
-    }
-  } catch (e) {
-    log(e);
-    UI.message(e);
-    return;
-  }
+  fetch(url, {
+    method: "get"
+  })
+    .then(function(response) {
+      callback(response);
+    })
+    .catch(function(err) {
+      UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
+    });
 }
 
 function getFirstAndRemoveFromArray(array) {
