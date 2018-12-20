@@ -1,0 +1,25 @@
+{
+  "name": "tinyfaces",
+  "version": "0.2.5",
+  "description": "Fill content with random avatars & data",
+  "homepage": "https://tinyfac.es",
+  "engines": {
+    "sketch": ">=3.0"
+  },
+  "skpm": {
+    "name": "TinyFaces 👦🏼👨🏾👩🏻",
+    "manifest": "src/manifest.json",
+    "main": "tinyfaces.sketchplugin",
+    "assets": ["assets/**/*"]
+  },
+  "scripts": {
+    "build": "skpm-build",
+    "watch": "skpm-build --watch",
+    "start": "skpm-build --watch --run",
+    "postinstall": "npm run build && skpm-link"
+  },
+  "devDependencies": {
+    "@skpm/builder": "^0.5.11"
+  },
+  "author": "Maxime De Greve <maximedegreve@me.com>"
+}

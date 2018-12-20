@@ -1,0 +1,44 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "icon": "icon.png",
+  "identifier": "com.maximedegreve.tinyfaces",
+  "commands": [
+    {
+      "name": "Fill with high quality...",
+      "identifier": "fillhigh",
+      "shortcut": "ctrl shift a",
+      "script": "./fill.js"
+    },
+    {
+      "name": "Fill with low quality...",
+      "identifier": "filllow",
+      "shortcut": "ctrl shift t",
+      "script": "./fill.js"
+    },
+    {
+      "name": "Fill with female...",
+      "identifier": "fillfemale",
+      "shortcut": "ctrl shift f",
+      "script": "./fill.js"
+    },
+    {
+      "name": "Fill with male...",
+      "identifier": "fillmale",
+      "shortcut": "ctrl shift m",
+      "script": "./fill.js"
+    }
+  ],
+  "menu": {
+    "title": "TinyFaces 👦🏼👨🏾👩🏻",
+    "isRoot": false,
+    "items": [
+      "fillhigh",
+      "filllow",
+      {
+        "title": "Filtered",
+        "items": ["fillmale", "fillfemale"]
+      }
+    ]
+  }
+}
