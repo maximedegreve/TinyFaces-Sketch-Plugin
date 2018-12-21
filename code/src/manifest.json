@@ -8,25 +8,25 @@
       "name": "Fill with high quality...",
       "identifier": "fillhigh",
       "shortcut": "ctrl shift a",
-      "script": "./fillHigh.js"
+      "script": "./menu/fillHigh.js"
     },
     {
       "name": "Fill with low quality...",
       "identifier": "filllow",
       "shortcut": "ctrl shift t",
-      "script": "./fillLow.js"
+      "script": "./menu/fillLow.js"
     },
     {
       "name": "Fill with female...",
       "identifier": "fillfemale",
       "shortcut": "ctrl shift f",
-      "script": "./fillFemale.js"
+      "script": "./menu/fillFemale.js"
     },
     {
       "name": "Fill with male...",
       "identifier": "fillmale",
       "shortcut": "ctrl shift m",
-      "script": "./fillMale.js"
+      "script": "./menu/fillMale.js"
     }
   ],
   "menu": {

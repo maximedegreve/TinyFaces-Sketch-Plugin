@@ -86,7 +86,7 @@ var exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/fillMale.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/menu/fillMale.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -932,24 +932,6 @@ function () {
 
 /***/ }),
 
-/***/ "./src/fillMale.js":
-/*!*************************!*\
-  !*** ./src/fillMale.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main */ "./src/main.js");
-
-/* harmony default export */ __webpack_exports__["default"] = (function () {
-  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"]();
-  main.fill("male", 0);
-});
-
-/***/ }),
-
 /***/ "./src/helpers.js":
 /*!************************!*\
   !*** ./src/helpers.js ***!
@@ -1027,19 +1009,25 @@ function () {
   }
 
   _createClass(Main, [{
+    key: "constructer",
+    value: function constructer(gender, minQuality) {
+      this.gender = gender;
+      this.minQuality = minQuality;
+    }
+  }, {
     key: "fill",
-    value: function fill(gender, minQuality) {
+    value: function fill(selectedLayers) {
       var _this = this;
 
       var doc = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
 
-      if (doc.selectedLayers.length == 0) {
+      if (selectedLayers.length == 0) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Select at least one layer first...");
         return;
       }
 
-      _api__WEBPACK_IMPORTED_MODULE_0__["default"].random(gender, minQuality).then(function (response) {
-        _this.fillSelectionWith(response);
+      _api__WEBPACK_IMPORTED_MODULE_0__["default"].random(this.gender, this.minQuality).then(function (json) {
+        _this.fillSelectionWith(json);
       }).catch(function (err) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
         console.log(err);
@@ -1047,17 +1035,17 @@ function () {
     }
   }, {
     key: "fillSelectionWith",
-    value: function fillSelectionWith(data) {
+    value: function fillSelectionWith(json) {
       var _this2 = this;
 
-      if (data === undefined) {
+      if (json === undefined) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Something went wrong getting data from tinyfac.es. Try again later?");
         return;
       }
 
       var imagesArray = [];
       var namesArray = [];
-      data.forEach(function (item) {
+      json.forEach(function (item) {
         var imageURL = item.avatars[2].url;
         imagesArray.push(imageURL);
         var name = item.first_name + " " + item.last_name;
@@ -1106,7 +1094,7 @@ function () {
     key: "getFirstSymbolMaster",
     value: function getFirstSymbolMaster(layers) {
       layers.forEach(function (layer) {
-        if (layer.type == "MSSymbolInstance") {
+        if (layer.type == "SymbolInstance") {
           var master = layer.symbolMaster();
           return master;
         }
@@ -1162,13 +1150,13 @@ function () {
       var _this3 = this;
 
       if (layer.type == "Text") {
-        var name = getFirstAndRemoveFromArray(namesArray);
+        var name = this.getFirstAndRemoveFromArray(namesArray);
         layer.stringValue = name;
       } else if (layer.type == "SymbolInstance") {
         if (layerOverride) {
           // update the mutable dictionary
           if (layerOverride.type == "ShapePath") {
-            var imageURLString = getFirstAndRemoveFromArray(imagesArray);
+            var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
             var imageData = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString); // Get existing overrides or make one if none exists
 
             var newOverrides = layer.overrides();
@@ -1185,7 +1173,7 @@ function () {
 
             layer.overrides = mutableOverrides;
           } else if (layerOverride.type == "Text") {
-            var name = getFirstAndRemoveFromArray(namesArray); // Get existing overrides or make one if none exists
+            var name = this.getFirstAndRemoveFromArray(namesArray); // Get existing overrides or make one if none exists
 
             var newOverrides = layer.overrides();
 
@@ -1220,6 +1208,29 @@ function () {
 }();
 
 /* harmony default export */ __webpack_exports__["default"] = (Main);
+
+/***/ }),
+
+/***/ "./src/menu/fillMale.js":
+/*!******************************!*\
+  !*** ./src/menu/fillMale.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../main */ "./src/main.js");
+/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sketch */ "sketch");
+/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sketch__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/* harmony default export */ __webpack_exports__["default"] = (function () {
+  var doc = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.getSelectedDocument();
+  var selection = doc.selectedLayers;
+  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"]("male", 0);
+  main.fill(selection);
+});
 
 /***/ }),
 

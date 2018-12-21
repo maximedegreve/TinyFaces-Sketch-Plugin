@@ -5,17 +5,22 @@ import Helpers from "./helpers";
 import sketch from "sketch";
 
 class Main {
-  fill(gender, minQuality) {
+  constructer(gender, minQuality) {
+    this.gender = gender;
+    this.minQuality = minQuality;
+  }
+
+  fill(selectedLayers) {
     const doc = sketch.getSelectedDocument();
 
-    if (doc.selectedLayers.length == 0) {
+    if (selectedLayers.length == 0) {
       sketch.UI.message(`Select at least one layer first...`);
       return;
     }
 
-    API.random(gender, minQuality)
-      .then(response => {
-        this.fillSelectionWith(response);
+    API.random(this.gender, this.minQuality)
+      .then(json => {
+        this.fillSelectionWith(json);
       })
       .catch(function(err) {
         sketch.UI.message(
@@ -25,8 +30,8 @@ class Main {
       });
   }
 
-  fillSelectionWith(data) {
-    if (data === undefined) {
+  fillSelectionWith(json) {
+    if (json === undefined) {
       sketch.UI.message(
         `Something went wrong getting data from tinyfac.es. Try again later?`
       );
@@ -36,7 +41,7 @@ class Main {
     var imagesArray = [];
     var namesArray = [];
 
-    data.forEach(item => {
+    json.forEach(item => {
       var imageURL = item.avatars[2].url;
       imagesArray.push(imageURL);
       var name = item.first_name + " " + item.last_name;
@@ -89,7 +94,7 @@ class Main {
 
   getFirstSymbolMaster(layers) {
     layers.forEach(layer => {
-      if (layer.type == "MSSymbolInstance") {
+      if (layer.type == "SymbolInstance") {
         let master = layer.symbolMaster();
         return master;
       }
@@ -140,14 +145,14 @@ class Main {
 
   fillLayer(layer, imagesArray, namesArray, layerOverride) {
     if (layer.type == "Text") {
-      var name = getFirstAndRemoveFromArray(namesArray);
+      var name = this.getFirstAndRemoveFromArray(namesArray);
       layer.stringValue = name;
     } else if (layer.type == "SymbolInstance") {
       if (layerOverride) {
         // update the mutable dictionary
 
         if (layerOverride.type == "ShapePath") {
-          var imageURLString = getFirstAndRemoveFromArray(imagesArray);
+          var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
           var imageData = Helpers.imageData(imageURLString);
 
           // Get existing overrides or make one if none exists
@@ -176,7 +181,7 @@ class Main {
           // Change overrides
           layer.overrides = mutableOverrides;
         } else if (layerOverride.type == "Text") {
-          var name = getFirstAndRemoveFromArray(namesArray);
+          var name = this.getFirstAndRemoveFromArray(namesArray);
 
           // Get existing overrides or make one if none exists
           var newOverrides = layer.overrides();
