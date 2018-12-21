@@ -1,6 +1,7 @@
 import API from "./api";
-import sketch from "sketch";
+import Helpers from "./helpers";
 
+import sketch from "sketch";
 // documentation: https://developer.sketchapp.com/reference/api/
 
 export default function(context) {
@@ -179,7 +180,7 @@ function fillLayer(layer, imagesArray, namesArray, layerOverride) {
 
       if (layerOverride.type == "ShapePath") {
         var imageURLString = getFirstAndRemoveFromArray(imagesArray);
-        var imageData = imageData(imageURLString);
+        var imageData = Helpers.imageData(imageURLString);
 
         // Get existing overrides or make one if none exists
         var newOverrides = layer.overrides();
@@ -237,29 +238,11 @@ function fillLayer(layer, imagesArray, namesArray, layerOverride) {
       .fills()
       .firstObject();
     fill.setFillType(4);
-    fill.setImage(imageData(imageURLString));
+    fill.setImage(Helpers.imageData(imageURLString));
     fill.setPatternFillType(1);
   } else if (layer.type == "Group") {
     layer.layers().forEach(function(layer) {
       fillLayer(layer, imagesArray, namesArray);
     });
-  }
-
-  // Helpers
-
-  function requestWithURL(url) {
-    let request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
-    return NSURLConnection.sendSynchronousRequest_returningResponse_error(
-      request,
-      null,
-      null
-    );
-  }
-
-  function imageData(url) {
-    let response = requestWithURL(url);
-    let nsimage = NSImage.alloc().initWithData(response);
-    let imageData = MSImageData.alloc().initWithImage(nsimage);
-    return imageData;
   }
 }
