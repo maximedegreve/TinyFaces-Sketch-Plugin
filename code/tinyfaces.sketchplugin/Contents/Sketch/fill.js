@@ -898,7 +898,7 @@ __webpack_require__.r(__webpack_exports__);
   var doc = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.getSelectedDocument();
 
   if (doc.selectedLayers.length == 0) {
-    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("Something went wrong while contacting tinyfac.es. Try again later?");
+    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("Select at least one layer first...");
     return;
   }
 
@@ -918,36 +918,36 @@ __webpack_require__.r(__webpack_exports__);
     gender = "female";
   }
 
-  getRandomData(gender, minQuality, function (data) {
-    fillSelectionWith(data.json());
+  getRandomData(gender, minQuality).then(function (response) {
+    fillSelectionWith(response);
+  }).catch(function (err) {
+    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
+    console.log(err);
   });
 });
 
 function fillSelectionWith(data) {
-  console.log(data);
-
-  if (data.length === 0) {
+  if (data === undefined) {
     sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("Something went wrong getting data from tinyfac.es. Try again later?");
     return;
   }
 
   var imagesArray = [];
   var namesArray = [];
-  return;
   data.forEach(function (item) {
     var imageURL = item.avatars[2].url;
     imagesArray.push(imageURL);
     var name = item.first_name + " " + item.last_name;
     namesArray.push(name);
   });
+  var doc = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.getSelectedDocument();
+  var selection = doc.selectedLayers;
 
   if (hasDifferentSymbols(selection)) {
-    UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
+    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
     return;
   }
 
-  var doc = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.getSelectedDocument();
-  var selection = doc.selectedLayers;
   var firstSymbolMaster = getFirstSymbolMaster(selection);
   var layerOverride;
 
@@ -957,7 +957,7 @@ function fillSelectionWith(data) {
   }
 
   selection.forEach(function (layer) {
-    fillLayer(layer, imagesArray, namesArray, context, layerOverride);
+    fillLayer(layer, imagesArray, namesArray, layerOverride);
   });
 }
 
@@ -971,7 +971,7 @@ function askForLayerToReplaceInSymbol(master) {
     names.push(name);
   }
 
-  var selection = UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
+  var selection = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
   var ok = selection[2];
   var value = options[selection[1]];
 
@@ -980,17 +980,16 @@ function askForLayerToReplaceInSymbol(master) {
 }
 
 function getFirstSymbolMaster(layers) {
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].className() == "MSSymbolInstance") {
-      var master = layers[i].symbolMaster();
+  layers.forEach(function (layer) {
+    if (layer.type == "MSSymbolInstance") {
+      var master = layer.symbolMaster();
       return master;
     }
-  }
-
+  });
   return false;
 }
 
-function getRandomData(gender, min_quality, callback) {
+function getRandomData(gender, min_quality) {
   var genderQuery = "";
 
   if (gender == "male") {
@@ -1000,12 +999,13 @@ function getRandomData(gender, min_quality, callback) {
   }
 
   var url = "https://tinyfac.es/api/users/?min_quality=" + min_quality + genderQuery;
-  fetch(url, {
-    method: "get"
+  return fetch(url, {
+    method: "GET"
   }).then(function (response) {
-    callback(response);
-  }).catch(function (err) {
-    UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
+    return response.text();
+  }).then(function (text) {
+    var json = JSON.parse(text);
+    return json;
   });
 }
 
@@ -1016,16 +1016,15 @@ function getFirstAndRemoveFromArray(array) {
 
 function hasDifferentSymbols(layers) {
   var seenUUIDs = [];
-
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].className() == "MSSymbolInstance") {
-      var uuid = layers[i].symbolMaster().objectID();
+  layers.forEach(function (layer) {
+    if (layer.type == "SymbolInstance") {
+      var uuid = layer.symbolMaster().objectID();
 
       if (seenUUIDs.indexOf(uuid) === -1) {
         seenUUIDs.push(uuid);
       }
     }
-  }
+  });
 
   if (seenUUIDs.length > 1) {
     return true;
@@ -1037,9 +1036,9 @@ function hasDifferentSymbols(layers) {
 function filterLayersToOverrideable(layers) {
   var possible = [];
   layers.forEach(function (layer) {
-    if (layer.className() == "MSTextLayer") {
+    if (layer.type == "Text") {
       possible.push(layer);
-    } else if (layer.className() == "MSShapeGroup") {
+    } else if (layer.type == "ShapePath") {
       var fills = layer.style().fills();
 
       if (fills[0].image()) {
@@ -1050,14 +1049,26 @@ function filterLayersToOverrideable(layers) {
   return possible;
 }
 
-function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
-  if (layer.className() == "MSTextLayer") {
+function requestWithURL(url) {
+  var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
+  return NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
+}
+
+function generateImageData(url) {
+  var response = requestWithURL(url);
+  var nsimage = NSImage.alloc().initWithData(response);
+  var imageData = MSImageData.alloc().initWithImage(nsimage);
+  return imageData;
+}
+
+function fillLayer(layer, imagesArray, namesArray, layerOverride) {
+  if (layer.type == "Text") {
     var name = getFirstAndRemoveFromArray(namesArray);
     layer.stringValue = name;
-  } else if (layer.className() == "MSSymbolInstance") {
+  } else if (layer.type == "SymbolInstance") {
     if (layerOverride) {
       // update the mutable dictionary
-      if (layerOverride.className() == "MSShapeGroup") {
+      if (layerOverride.type == "ShapePath") {
         var imageURLString = getFirstAndRemoveFromArray(imagesArray);
         var imageData = generateImageData(imageURLString); // Get existing overrides or make one if none exists
 
@@ -1074,7 +1085,7 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
         mutableOverrides.setObject_forKey(imageData, layerOverride.objectID()); // Change overrides
 
         layer.overrides = mutableOverrides;
-      } else if (layerOverride.className() == "MSTextLayer") {
+      } else if (layerOverride.type == "Text") {
         var name = getFirstAndRemoveFromArray(namesArray); // Get existing overrides or make one if none exists
 
         var newOverrides = layer.overrides();
@@ -1092,15 +1103,15 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
         layer.overrides = mutableOverrides;
       }
     }
-  } else if (layer.className() == "MSShapeGroup") {
+  } else if (layer.type == "ShapePath") {
     var imageURLString = getFirstAndRemoveFromArray(imagesArray);
-    var fill = layer.style().fills().firstObject();
+    var fill = layer.sketchObject.style().fills().firstObject();
     fill.setFillType(4);
     fill.setImage(generateImageData(imageURLString));
     fill.setPatternFillType(1);
-  } else if (layer.className() == "MSLayerGroup") {
+  } else if (layer.type == "Group") {
     layer.layers().forEach(function (layer) {
-      fillLayer(layer, imagesArray, namesArray, context);
+      fillLayer(layer, imagesArray, namesArray);
     });
   }
 }

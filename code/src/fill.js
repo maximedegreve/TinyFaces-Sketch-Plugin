@@ -5,9 +5,7 @@ export default function(context) {
   const doc = sketch.getSelectedDocument();
 
   if (doc.selectedLayers.length == 0) {
-    sketch.UI.message(
-      `Something went wrong while contacting tinyfac.es. Try again later?`
-    );
+    sketch.UI.message(`Select at least one layer first...`);
     return;
   }
 
@@ -24,15 +22,20 @@ export default function(context) {
     gender = "female";
   }
 
-  getRandomData(gender, minQuality, function(data) {
-    fillSelectionWith(data.json());
-  });
+  getRandomData(gender, minQuality)
+    .then(response => {
+      fillSelectionWith(response);
+    })
+    .catch(function(err) {
+      sketch.UI.message(
+        "⚠️ TinyFaces can't be contacted. Check your internet..."
+      );
+      console.log(err);
+    });
 }
 
 function fillSelectionWith(data) {
-  console.log(data);
-
-  if (data.length === 0) {
+  if (data === undefined) {
     sketch.UI.message(
       `Something went wrong getting data from tinyfac.es. Try again later?`
     );
@@ -42,8 +45,6 @@ function fillSelectionWith(data) {
   var imagesArray = [];
   var namesArray = [];
 
-  return;
-
   data.forEach(item => {
     var imageURL = item.avatars[2].url;
     imagesArray.push(imageURL);
@@ -51,16 +52,16 @@ function fillSelectionWith(data) {
     namesArray.push(name);
   });
 
+  const doc = sketch.getSelectedDocument();
+  const selection = doc.selectedLayers;
+
   if (hasDifferentSymbols(selection)) {
-    UI.alert(
+    sketch.UI.alert(
       "You can't have different types of symbols selected when using this.",
       "Make sure you only have one type of symbol and try again."
     );
     return;
   }
-
-  const doc = sketch.getSelectedDocument();
-  const selection = doc.selectedLayers;
 
   var firstSymbolMaster = getFirstSymbolMaster(selection);
   var layerOverride;
@@ -70,7 +71,7 @@ function fillSelectionWith(data) {
   }
 
   selection.forEach(function(layer) {
-    fillLayer(layer, imagesArray, namesArray, context, layerOverride);
+    fillLayer(layer, imagesArray, namesArray, layerOverride);
   });
 }
 
@@ -83,7 +84,7 @@ function askForLayerToReplaceInSymbol(master) {
     names.push(name);
   }
 
-  var selection = UI.getSelectionFromUser(
+  var selection = sketch.UI.getSelectionFromUser(
     "What layer would you like to fill with random data?",
     names
   );
@@ -96,17 +97,17 @@ function askForLayerToReplaceInSymbol(master) {
 }
 
 function getFirstSymbolMaster(layers) {
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].className() == "MSSymbolInstance") {
-      let master = layers[i].symbolMaster();
+  layers.forEach(layer => {
+    if (layer.type == "MSSymbolInstance") {
+      let master = layer.symbolMaster();
       return master;
     }
-  }
+  });
 
   return false;
 }
 
-function getRandomData(gender, min_quality, callback) {
+function getRandomData(gender, min_quality) {
   var genderQuery = "";
   if (gender == "male") {
     genderQuery = "&gender=male";
@@ -116,14 +117,13 @@ function getRandomData(gender, min_quality, callback) {
   var url =
     "https://tinyfac.es/api/users/?min_quality=" + min_quality + genderQuery;
 
-  fetch(url, {
-    method: "get"
+  return fetch(url, {
+    method: "GET"
   })
-    .then(function(response) {
-      callback(response);
-    })
-    .catch(function(err) {
-      UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
+    .then(response => response.text())
+    .then(text => {
+      var json = JSON.parse(text);
+      return json;
     });
 }
 
@@ -134,14 +134,16 @@ function getFirstAndRemoveFromArray(array) {
 
 function hasDifferentSymbols(layers) {
   var seenUUIDs = [];
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].className() == "MSSymbolInstance") {
-      let uuid = layers[i].symbolMaster().objectID();
+
+  layers.forEach(layer => {
+    if (layer.type == "SymbolInstance") {
+      let uuid = layer.symbolMaster().objectID();
       if (seenUUIDs.indexOf(uuid) === -1) {
         seenUUIDs.push(uuid);
       }
     }
-  }
+  });
+
   if (seenUUIDs.length > 1) {
     return true;
   }
@@ -152,9 +154,9 @@ function filterLayersToOverrideable(layers) {
   var possible = [];
 
   layers.forEach(function(layer) {
-    if (layer.className() == "MSTextLayer") {
+    if (layer.type == "Text") {
       possible.push(layer);
-    } else if (layer.className() == "MSShapeGroup") {
+    } else if (layer.type == "ShapePath") {
       var fills = layer.style().fills();
       if (fills[0].image()) {
         possible.push(layer);
@@ -165,15 +167,31 @@ function filterLayersToOverrideable(layers) {
   return possible;
 }
 
-function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
-  if (layer.className() == "MSTextLayer") {
+function requestWithURL(url) {
+  let request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
+  return NSURLConnection.sendSynchronousRequest_returningResponse_error(
+    request,
+    null,
+    null
+  );
+}
+
+function generateImageData(url) {
+  let response = requestWithURL(url);
+  let nsimage = NSImage.alloc().initWithData(response);
+  let imageData = MSImageData.alloc().initWithImage(nsimage);
+  return imageData;
+}
+
+function fillLayer(layer, imagesArray, namesArray, layerOverride) {
+  if (layer.type == "Text") {
     var name = getFirstAndRemoveFromArray(namesArray);
     layer.stringValue = name;
-  } else if (layer.className() == "MSSymbolInstance") {
+  } else if (layer.type == "SymbolInstance") {
     if (layerOverride) {
       // update the mutable dictionary
 
-      if (layerOverride.className() == "MSShapeGroup") {
+      if (layerOverride.type == "ShapePath") {
         var imageURLString = getFirstAndRemoveFromArray(imagesArray);
         var imageData = generateImageData(imageURLString);
 
@@ -199,7 +217,7 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
 
         // Change overrides
         layer.overrides = mutableOverrides;
-      } else if (layerOverride.className() == "MSTextLayer") {
+      } else if (layerOverride.type == "Text") {
         var name = getFirstAndRemoveFromArray(namesArray);
 
         // Get existing overrides or make one if none exists
@@ -226,18 +244,18 @@ function fillLayer(layer, imagesArray, namesArray, context, layerOverride) {
         layer.overrides = mutableOverrides;
       }
     }
-  } else if (layer.className() == "MSShapeGroup") {
+  } else if (layer.type == "ShapePath") {
     var imageURLString = getFirstAndRemoveFromArray(imagesArray);
-    var fill = layer
+    let fill = layer.sketchObject
       .style()
       .fills()
       .firstObject();
     fill.setFillType(4);
     fill.setImage(generateImageData(imageURLString));
     fill.setPatternFillType(1);
-  } else if (layer.className() == "MSLayerGroup") {
+  } else if (layer.type == "Group") {
     layer.layers().forEach(function(layer) {
-      fillLayer(layer, imagesArray, namesArray, context);
+      fillLayer(layer, imagesArray, namesArray);
     });
   }
 }
