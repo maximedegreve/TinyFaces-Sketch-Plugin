@@ -881,6 +881,57 @@ module.exports = fetch
 
 /***/ }),
 
+/***/ "./src/api.js":
+/*!********************!*\
+  !*** ./src/api.js ***!
+  \********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(fetch) {function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var API =
+/*#__PURE__*/
+function () {
+  function API() {
+    _classCallCheck(this, API);
+  }
+
+  _createClass(API, null, [{
+    key: "random",
+    value: function random(gender, min_quality) {
+      var apiURL = "https://tinyfac.es/api/users/";
+      var query = "?min_quality=" + min_quality;
+
+      if (gender) {
+        query = query + "&gender=" + gender;
+      }
+
+      return fetch(apiURL + query, {
+        method: "GET"
+      }).then(function (response) {
+        return response.text();
+      }).then(function (text) {
+        var json = JSON.parse(text);
+        return json;
+      });
+    }
+  }]);
+
+  return API;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (API);
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/sketch-polyfill-fetch/lib/index.js */ "./node_modules/sketch-polyfill-fetch/lib/index.js")))
+
+/***/ }),
+
 /***/ "./src/fill.js":
 /*!*********************!*\
   !*** ./src/fill.js ***!
@@ -890,15 +941,17 @@ module.exports = fetch
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(fetch) {/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sketch */ "sketch");
-/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sketch__WEBPACK_IMPORTED_MODULE_0__);
+/* WEBPACK VAR INJECTION */(function(fetch) {/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./src/api.js");
+/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sketch */ "sketch");
+/* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sketch__WEBPACK_IMPORTED_MODULE_1__);
+
  // documentation: https://developer.sketchapp.com/reference/api/
 
 /* harmony default export */ __webpack_exports__["default"] = (function (context) {
-  var doc = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.getSelectedDocument();
+  var doc = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.getSelectedDocument();
 
   if (doc.selectedLayers.length == 0) {
-    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("Select at least one layer first...");
+    sketch__WEBPACK_IMPORTED_MODULE_1___default.a.UI.message("Select at least one layer first...");
     return;
   }
 
@@ -918,17 +971,17 @@ __webpack_require__.r(__webpack_exports__);
     gender = "female";
   }
 
-  getRandomData(gender, minQuality).then(function (response) {
+  _api__WEBPACK_IMPORTED_MODULE_0__["default"].random(gender, minQuality).then(function (response) {
     fillSelectionWith(response);
   }).catch(function (err) {
-    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
+    sketch__WEBPACK_IMPORTED_MODULE_1___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
     console.log(err);
   });
 });
 
 function fillSelectionWith(data) {
   if (data === undefined) {
-    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.message("Something went wrong getting data from tinyfac.es. Try again later?");
+    sketch__WEBPACK_IMPORTED_MODULE_1___default.a.UI.message("Something went wrong getting data from tinyfac.es. Try again later?");
     return;
   }
 
@@ -940,11 +993,11 @@ function fillSelectionWith(data) {
     var name = item.first_name + " " + item.last_name;
     namesArray.push(name);
   });
-  var doc = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.getSelectedDocument();
+  var doc = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.getSelectedDocument();
   var selection = doc.selectedLayers;
 
   if (hasDifferentSymbols(selection)) {
-    sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
+    sketch__WEBPACK_IMPORTED_MODULE_1___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
     return;
   }
 
@@ -971,7 +1024,7 @@ function askForLayerToReplaceInSymbol(master) {
     names.push(name);
   }
 
-  var selection = sketch__WEBPACK_IMPORTED_MODULE_0___default.a.UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
+  var selection = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
   var ok = selection[2];
   var value = options[selection[1]];
 
@@ -1049,18 +1102,6 @@ function filterLayersToOverrideable(layers) {
   return possible;
 }
 
-function requestWithURL(url) {
-  var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
-  return NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
-}
-
-function generateImageData(url) {
-  var response = requestWithURL(url);
-  var nsimage = NSImage.alloc().initWithData(response);
-  var imageData = MSImageData.alloc().initWithImage(nsimage);
-  return imageData;
-}
-
 function fillLayer(layer, imagesArray, namesArray, layerOverride) {
   if (layer.type == "Text") {
     var name = getFirstAndRemoveFromArray(namesArray);
@@ -1070,7 +1111,7 @@ function fillLayer(layer, imagesArray, namesArray, layerOverride) {
       // update the mutable dictionary
       if (layerOverride.type == "ShapePath") {
         var imageURLString = getFirstAndRemoveFromArray(imagesArray);
-        var imageData = generateImageData(imageURLString); // Get existing overrides or make one if none exists
+        var imageData = imageData(imageURLString); // Get existing overrides or make one if none exists
 
         var newOverrides = layer.overrides();
 
@@ -1107,12 +1148,25 @@ function fillLayer(layer, imagesArray, namesArray, layerOverride) {
     var imageURLString = getFirstAndRemoveFromArray(imagesArray);
     var fill = layer.sketchObject.style().fills().firstObject();
     fill.setFillType(4);
-    fill.setImage(generateImageData(imageURLString));
+    fill.setImage(imageData(imageURLString));
     fill.setPatternFillType(1);
   } else if (layer.type == "Group") {
     layer.layers().forEach(function (layer) {
       fillLayer(layer, imagesArray, namesArray);
     });
+  } // Helpers
+
+
+  function requestWithURL(url) {
+    var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
+    return NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
+  }
+
+  function imageData(url) {
+    var response = requestWithURL(url);
+    var nsimage = NSImage.alloc().initWithData(response);
+    var imageData = MSImageData.alloc().initWithImage(nsimage);
+    return imageData;
   }
 }
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/sketch-polyfill-fetch/lib/index.js */ "./node_modules/sketch-polyfill-fetch/lib/index.js")))
