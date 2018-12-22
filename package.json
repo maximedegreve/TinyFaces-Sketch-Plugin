@@ -11,7 +11,9 @@
     "manifest": "src/manifest.json",
     "main": "tinyfaces.sketchplugin",
     "disableCocoaScriptPreprocessor": true,
-    "assets": ["assets/**/*"]
+    "assets": [
+      "assets/**/*"
+    ]
   },
   "repository": {
     "type": "git",
