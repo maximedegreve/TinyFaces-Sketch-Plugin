@@ -1004,25 +1004,21 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var Main =
 /*#__PURE__*/
 function () {
-  function Main() {
+  function Main(gender, minQuality) {
     _classCallCheck(this, Main);
+
+    this.gender = gender;
+    this.minQuality = minQuality;
+    var document = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
+    this.selectedLayers = document.selectedLayers;
   }
 
   _createClass(Main, [{
-    key: "constructer",
-    value: function constructer(selectedLayers, gender, minQuality) {
-      this.gender = gender;
-      this.minQuality = minQuality;
-      this.selectedLayers = layers;
-    }
-  }, {
     key: "fill",
     value: function fill() {
       var _this = this;
 
       // Select if at least one layer is selected
-      console.log(this);
-
       if (this.selectedLayers.length == 0) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Select at least one layer first...");
         return;
@@ -1057,8 +1053,8 @@ function () {
         layerOverride = layer;
       }
 
-      selection.forEach(function (layer) {
-        _this2.fillLayer(layer, imagesArray, namesArray, layerOverride);
+      this.selectedLayers.forEach(function (layer) {
+        _this2.fillLayer(layer, images, names, layerOverride);
       });
     }
   }, {
@@ -1233,9 +1229,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
-  var doc = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.getSelectedDocument();
-  var selection = doc.selectedLayers;
-  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"](selection, undefined, 0);
+  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"](undefined, 0);
   main.fill();
 });
 

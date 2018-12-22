@@ -5,15 +5,16 @@ import Helpers from "./helpers";
 import sketch from "sketch";
 
 class Main {
-  constructer(selectedLayers, gender, minQuality) {
+  constructor(gender, minQuality) {
     this.gender = gender;
     this.minQuality = minQuality;
-    this.selectedLayers = layers;
+
+    const document = sketch.getSelectedDocument();
+    this.selectedLayers = document.selectedLayers;
   }
 
   fill() {
     // Select if at least one layer is selected
-    console.log(this);
     if (this.selectedLayers.length == 0) {
       sketch.UI.message(`Select at least one layer first...`);
       return;
@@ -50,8 +51,8 @@ class Main {
       layerOverride = layer;
     }
 
-    selection.forEach(layer => {
-      this.fillLayer(layer, imagesArray, namesArray, layerOverride);
+    this.selectedLayers.forEach(layer => {
+      this.fillLayer(layer, images, names, layerOverride);
     });
   }
 
