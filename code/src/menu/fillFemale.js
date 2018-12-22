@@ -5,6 +5,6 @@ export default function() {
   const doc = sketch.getSelectedDocument();
   const selection = doc.selectedLayers;
 
-  let main = new Main("female", 0);
-  main.fill(selection);
+  const main = new Main(selection, "female", 0);
+  main.fill();
 }

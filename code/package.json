@@ -10,7 +10,12 @@
     "name": "TinyFaces 👦🏼👨🏾👩🏻",
     "manifest": "src/manifest.json",
     "main": "tinyfaces.sketchplugin",
+    "disableCocoaScriptPreprocessor": true,
     "assets": ["assets/**/*"]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximedegreve/TinyFaces-Sketch-Plugin.git"
   },
   "scripts": {
     "build": "skpm-build",

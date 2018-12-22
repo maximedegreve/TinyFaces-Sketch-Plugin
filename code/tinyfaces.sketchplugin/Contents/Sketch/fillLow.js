@@ -1010,56 +1010,46 @@ function () {
 
   _createClass(Main, [{
     key: "constructer",
-    value: function constructer(gender, minQuality) {
+    value: function constructer(selectedLayers, gender, minQuality) {
       this.gender = gender;
       this.minQuality = minQuality;
+      this.selectedLayers = layers;
     }
   }, {
     key: "fill",
-    value: function fill(selectedLayers) {
+    value: function fill() {
       var _this = this;
 
-      var doc = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
+      // Select if at least one layer is selected
+      console.log(this);
 
-      if (selectedLayers.length == 0) {
+      if (this.selectedLayers.length == 0) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Select at least one layer first...");
         return;
-      }
+      } // Check if different types of symbols are selected
+
+
+      if (this.hasDifferentSymbols(this.selectedLayers)) {
+        sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
+        return;
+      } // We're good to go...
+
 
       _api__WEBPACK_IMPORTED_MODULE_0__["default"].random(this.gender, this.minQuality).then(function (json) {
-        _this.fillSelectionWith(json);
+        var arrays = _this.namesAndImagesArrays(json);
+
+        _this.fillWith(arrays.images, arrays.names);
       }).catch(function (err) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
         console.log(err);
       });
     }
   }, {
-    key: "fillSelectionWith",
-    value: function fillSelectionWith(json) {
+    key: "fillWith",
+    value: function fillWith(images, names) {
       var _this2 = this;
 
-      if (json === undefined) {
-        sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Something went wrong getting data from tinyfac.es. Try again later?");
-        return;
-      }
-
-      var imagesArray = [];
-      var namesArray = [];
-      json.forEach(function (item) {
-        var imageURL = item.avatars[2].url;
-        imagesArray.push(imageURL);
-        var name = item.first_name + " " + item.last_name;
-        namesArray.push(name);
-      });
-      var doc = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
-      var selection = doc.selectedLayers;
-
-      if (this.hasDifferentSymbols(selection)) {
-        sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
-        return;
-      }
-
-      var firstSymbolMaster = this.getFirstSymbolMaster(selection);
+      var firstSymbolMaster = this.getFirstSymbolMaster(this.selectedLayers);
       var layerOverride;
 
       if (firstSymbolMaster) {
@@ -1201,6 +1191,23 @@ function () {
           _this3.fillLayer(layer, imagesArray, namesArray);
         });
       }
+    } // Helpers
+
+  }, {
+    key: "namesAndImagesArrays",
+    value: function namesAndImagesArrays(json) {
+      var imagesArray = [];
+      var namesArray = [];
+      json.forEach(function (item) {
+        var imageURL = item.avatars[2].url;
+        imagesArray.push(imageURL);
+        var name = item.first_name + " " + item.last_name;
+        namesArray.push(name);
+      });
+      return {
+        images: imagesArray,
+        names: namesArray
+      };
     }
   }]);
 
@@ -1228,8 +1235,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var doc = sketch__WEBPACK_IMPORTED_MODULE_1___default.a.getSelectedDocument();
   var selection = doc.selectedLayers;
-  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"](undefined, 0);
-  main.fill(selection);
+  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"](selection, undefined, 0);
+  main.fill();
 });
 
 /***/ }),

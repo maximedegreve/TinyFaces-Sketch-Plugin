@@ -5,22 +5,34 @@ import Helpers from "./helpers";
 import sketch from "sketch";
 
 class Main {
-  constructer(gender, minQuality) {
+  constructer(selectedLayers, gender, minQuality) {
     this.gender = gender;
     this.minQuality = minQuality;
+    this.selectedLayers = layers;
   }
 
-  fill(selectedLayers) {
-    const doc = sketch.getSelectedDocument();
-
-    if (selectedLayers.length == 0) {
+  fill() {
+    // Select if at least one layer is selected
+    console.log(this);
+    if (this.selectedLayers.length == 0) {
       sketch.UI.message(`Select at least one layer first...`);
       return;
     }
 
+    // Check if different types of symbols are selected
+    if (this.hasDifferentSymbols(this.selectedLayers)) {
+      sketch.UI.alert(
+        "You can't have different types of symbols selected when using this.",
+        "Make sure you only have one type of symbol and try again."
+      );
+      return;
+    }
+
+    // We're good to go...
     API.random(this.gender, this.minQuality)
       .then(json => {
-        this.fillSelectionWith(json);
+        const arrays = this.namesAndImagesArrays(json);
+        this.fillWith(arrays.images, arrays.names);
       })
       .catch(function(err) {
         sketch.UI.message(
@@ -30,36 +42,8 @@ class Main {
       });
   }
 
-  fillSelectionWith(json) {
-    if (json === undefined) {
-      sketch.UI.message(
-        `Something went wrong getting data from tinyfac.es. Try again later?`
-      );
-      return;
-    }
-
-    var imagesArray = [];
-    var namesArray = [];
-
-    json.forEach(item => {
-      var imageURL = item.avatars[2].url;
-      imagesArray.push(imageURL);
-      var name = item.first_name + " " + item.last_name;
-      namesArray.push(name);
-    });
-
-    const doc = sketch.getSelectedDocument();
-    const selection = doc.selectedLayers;
-
-    if (this.hasDifferentSymbols(selection)) {
-      sketch.UI.alert(
-        "You can't have different types of symbols selected when using this.",
-        "Make sure you only have one type of symbol and try again."
-      );
-      return;
-    }
-
-    var firstSymbolMaster = this.getFirstSymbolMaster(selection);
+  fillWith(images, names) {
+    var firstSymbolMaster = this.getFirstSymbolMaster(this.selectedLayers);
     var layerOverride;
     if (firstSymbolMaster) {
       var layer = this.askForLayerToReplaceInSymbol(firstSymbolMaster, context);
@@ -221,6 +205,22 @@ class Main {
         this.fillLayer(layer, imagesArray, namesArray);
       });
     }
+  }
+
+  // Helpers
+
+  namesAndImagesArrays(json) {
+    var imagesArray = [];
+    var namesArray = [];
+
+    json.forEach(item => {
+      var imageURL = item.avatars[2].url;
+      imagesArray.push(imageURL);
+      var name = item.first_name + " " + item.last_name;
+      namesArray.push(name);
+    });
+
+    return { images: imagesArray, names: namesArray };
   }
 }
 
