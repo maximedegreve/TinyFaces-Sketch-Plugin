@@ -27,5 +27,6 @@
   "devDependencies": {
     "@skpm/builder": "^0.5.11"
   },
-  "author": "Maxime De Greve <maximedegreve@me.com>"
+  "author": "Maxime De Greve <maximedegreve@me.com>",
+  "license": "MIT"
 }
