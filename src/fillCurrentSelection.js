@@ -4,24 +4,25 @@ import API from "./api";
 import Helpers from "./helpers";
 import sketch from "sketch";
 
-class Main {
+class FillCurrentSelection {
   constructor(gender, minQuality) {
     this.gender = gender;
     this.minQuality = minQuality;
 
     const document = sketch.getSelectedDocument();
     this.selectedLayers = document.selectedLayers;
+    this.symbolMasters = Helpers.symbolMasters(this.selectedLayers);
   }
 
   fill() {
-    // Select if at least one layer is selected
+    // Select at least one layer...
     if (this.selectedLayers.length == 0) {
       sketch.UI.message(`Select at least one layer first...`);
       return;
     }
 
     // Check if different types of symbols are selected
-    if (this.hasDifferentSymbols(this.selectedLayers)) {
+    if (this.symbolMasters.length > 1) {
       sketch.UI.alert(
         "You can't have different types of symbols selected when using this.",
         "Make sure you only have one type of symbol and try again."
@@ -44,10 +45,12 @@ class Main {
   }
 
   fillWith(images, names) {
-    var firstSymbolMaster = this.getFirstSymbolMaster(this.selectedLayers);
     var layerOverride;
-    if (firstSymbolMaster) {
-      var layer = this.askForLayerToReplaceInSymbol(firstSymbolMaster, context);
+    if (this.symbolMasters.length == 1) {
+      var layer = this.askForLayerToReplaceInSymbol(
+        this.symbolMasters[0],
+        context
+      );
       layerOverride = layer;
     }
 
@@ -77,38 +80,9 @@ class Main {
     }
   }
 
-  getFirstSymbolMaster(layers) {
-    layers.forEach(layer => {
-      if (layer.type == "SymbolInstance") {
-        let master = layer.symbolMaster();
-        return master;
-      }
-    });
-
-    return false;
-  }
-
   getFirstAndRemoveFromArray(array) {
     var value = array.splice(0, 1)[0];
     return value;
-  }
-
-  hasDifferentSymbols(layers) {
-    var seenUUIDs = [];
-
-    layers.forEach(layer => {
-      if (layer.type == "SymbolInstance") {
-        let uuid = layer.symbolMaster().objectID();
-        if (seenUUIDs.indexOf(uuid) === -1) {
-          seenUUIDs.push(uuid);
-        }
-      }
-    });
-
-    if (seenUUIDs.length > 1) {
-      return true;
-    }
-    return false;
   }
 
   filterLayersToOverrideable(layers) {
@@ -225,4 +199,4 @@ class Main {
   }
 }
 
-export default Main;
+export default FillCurrentSelection;

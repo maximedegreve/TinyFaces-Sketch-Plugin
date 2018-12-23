@@ -932,55 +932,10 @@ function () {
 
 /***/ }),
 
-/***/ "./src/helpers.js":
-/*!************************!*\
-  !*** ./src/helpers.js ***!
-  \************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Helpers =
-/*#__PURE__*/
-function () {
-  function Helpers() {
-    _classCallCheck(this, Helpers);
-  }
-
-  _createClass(Helpers, null, [{
-    key: "requestWithURL",
-    value: function requestWithURL(url) {
-      var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
-      return NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
-    }
-  }, {
-    key: "imageData",
-    value: function imageData(url) {
-      var response = Helpers.requestWithURL(url);
-      var nsimage = NSImage.alloc().initWithData(response);
-      var imageData = MSImageData.alloc().initWithImage(nsimage);
-      return imageData;
-    }
-  }]);
-
-  return Helpers;
-}();
-
-/* harmony default export */ __webpack_exports__["default"] = (Helpers);
-
-/***/ }),
-
-/***/ "./src/main.js":
-/*!*********************!*\
-  !*** ./src/main.js ***!
-  \*********************/
+/***/ "./src/fillCurrentSelection.js":
+/*!*************************************!*\
+  !*** ./src/fillCurrentSelection.js ***!
+  \*************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1001,31 +956,32 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-var Main =
+var FillCurrentSelection =
 /*#__PURE__*/
 function () {
-  function Main(gender, minQuality) {
-    _classCallCheck(this, Main);
+  function FillCurrentSelection(gender, minQuality) {
+    _classCallCheck(this, FillCurrentSelection);
 
     this.gender = gender;
     this.minQuality = minQuality;
     var document = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
     this.selectedLayers = document.selectedLayers;
+    this.symbolMasters = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].symbolMasters(this.selectedLayers);
   }
 
-  _createClass(Main, [{
+  _createClass(FillCurrentSelection, [{
     key: "fill",
     value: function fill() {
       var _this = this;
 
-      // Select if at least one layer is selected
+      // Select at least one layer...
       if (this.selectedLayers.length == 0) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("Select at least one layer first...");
         return;
       } // Check if different types of symbols are selected
 
 
-      if (this.hasDifferentSymbols(this.selectedLayers)) {
+      if (this.symbolMasters.length > 1) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
         return;
       } // We're good to go...
@@ -1045,11 +1001,10 @@ function () {
     value: function fillWith(images, names) {
       var _this2 = this;
 
-      var firstSymbolMaster = this.getFirstSymbolMaster(this.selectedLayers);
       var layerOverride;
 
-      if (firstSymbolMaster) {
-        var layer = this.askForLayerToReplaceInSymbol(firstSymbolMaster, context);
+      if (this.symbolMasters.length == 1) {
+        var layer = this.askForLayerToReplaceInSymbol(this.symbolMasters[0], context);
         layerOverride = layer;
       }
 
@@ -1077,41 +1032,10 @@ function () {
       }
     }
   }, {
-    key: "getFirstSymbolMaster",
-    value: function getFirstSymbolMaster(layers) {
-      layers.forEach(function (layer) {
-        if (layer.type == "SymbolInstance") {
-          var master = layer.symbolMaster();
-          return master;
-        }
-      });
-      return false;
-    }
-  }, {
     key: "getFirstAndRemoveFromArray",
     value: function getFirstAndRemoveFromArray(array) {
       var value = array.splice(0, 1)[0];
       return value;
-    }
-  }, {
-    key: "hasDifferentSymbols",
-    value: function hasDifferentSymbols(layers) {
-      var seenUUIDs = [];
-      layers.forEach(function (layer) {
-        if (layer.type == "SymbolInstance") {
-          var uuid = layer.symbolMaster().objectID();
-
-          if (seenUUIDs.indexOf(uuid) === -1) {
-            seenUUIDs.push(uuid);
-          }
-        }
-      });
-
-      if (seenUUIDs.length > 1) {
-        return true;
-      }
-
-      return false;
     }
   }, {
     key: "filterLayersToOverrideable",
@@ -1207,10 +1131,70 @@ function () {
     }
   }]);
 
-  return Main;
+  return FillCurrentSelection;
 }();
 
-/* harmony default export */ __webpack_exports__["default"] = (Main);
+/* harmony default export */ __webpack_exports__["default"] = (FillCurrentSelection);
+
+/***/ }),
+
+/***/ "./src/helpers.js":
+/*!************************!*\
+  !*** ./src/helpers.js ***!
+  \************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Helpers =
+/*#__PURE__*/
+function () {
+  function Helpers() {
+    _classCallCheck(this, Helpers);
+  }
+
+  _createClass(Helpers, null, [{
+    key: "requestWithURL",
+    value: function requestWithURL(url) {
+      var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
+      return NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
+    }
+  }, {
+    key: "imageData",
+    value: function imageData(url) {
+      var response = Helpers.requestWithURL(url);
+      var nsimage = NSImage.alloc().initWithData(response);
+      var imageData = MSImageData.alloc().initWithImage(nsimage);
+      return imageData;
+    }
+  }, {
+    key: "symbolMasters",
+    value: function symbolMasters(layers) {
+      var masters = [];
+      layers.forEach(function (layer) {
+        if (layer.type == "SymbolInstance") {
+          var master = layer.master;
+
+          if (masters.indexOf(master) === -1) {
+            masters.push(master);
+          }
+        }
+      });
+      return masters;
+    }
+  }]);
+
+  return Helpers;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Helpers);
 
 /***/ }),
 
@@ -1223,14 +1207,14 @@ function () {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../main */ "./src/main.js");
+/* harmony import */ var _fillCurrentSelection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../fillCurrentSelection */ "./src/fillCurrentSelection.js");
 /* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sketch */ "sketch");
 /* harmony import */ var sketch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sketch__WEBPACK_IMPORTED_MODULE_1__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
-  var main = new _main__WEBPACK_IMPORTED_MODULE_0__["default"](undefined, 0);
-  main.fill();
+  var fill = new _fillCurrentSelection__WEBPACK_IMPORTED_MODULE_0__["default"](undefined, 0);
+  fill.fill();
 });
 
 /***/ }),

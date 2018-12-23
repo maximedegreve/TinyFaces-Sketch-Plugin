@@ -1,7 +1,7 @@
-import Main from "../main";
+import FillCurrentSelection from "../fillCurrentSelection";
 import sketch from "sketch";
 
 export default function() {
-  const main = new Main(undefined, 6);
-  main.fill();
+  const fill = new FillCurrentSelection(undefined, 6);
+  fill.fill();
 }

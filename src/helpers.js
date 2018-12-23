@@ -14,6 +14,21 @@ class Helpers {
     let imageData = MSImageData.alloc().initWithImage(nsimage);
     return imageData;
   }
+
+  static symbolMasters(layers) {
+    var masters = [];
+
+    layers.forEach(layer => {
+      if (layer.type == "SymbolInstance") {
+        const master = layer.master;
+        if (masters.indexOf(master) === -1) {
+          masters.push(master);
+        }
+      }
+    });
+
+    return masters;
+  }
 }
 
 export default Helpers;
