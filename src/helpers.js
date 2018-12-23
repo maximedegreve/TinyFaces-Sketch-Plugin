@@ -15,15 +15,33 @@ class Helpers {
     return imageData;
   }
 
+  static overrideableLayers(layers) {
+    return layers.filter(function(layer) {
+      if (layer.type == "Text") {
+        return true;
+      }
+
+      if (layer.type == "ShapePath" && layer.style.fills[0].image) {
+        return true;
+      }
+
+      return false;
+    });
+  }
+
   static symbolMasters(layers) {
     var masters = [];
 
     layers.forEach(layer => {
-      if (layer.type == "SymbolInstance") {
-        const master = layer.master;
-        if (masters.indexOf(master) === -1) {
-          masters.push(master);
-        }
+      if (layer.type !== "SymbolInstance") {
+        return;
+      }
+      const alreadyIncluded = masters
+        .map(master => master.symbolId)
+        .includes(layer.symbolId);
+
+      if (alreadyIncluded === false) {
+        masters.push(layer.master);
       }
     });
 

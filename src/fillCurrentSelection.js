@@ -12,6 +12,7 @@ class FillCurrentSelection {
     const document = sketch.getSelectedDocument();
     this.selectedLayers = document.selectedLayers;
     this.symbolMasters = Helpers.symbolMasters(this.selectedLayers);
+    this.symbolLayer = undefined;
   }
 
   fill() {
@@ -30,6 +31,15 @@ class FillCurrentSelection {
       return;
     }
 
+    // Ask what layer in the symbol you want to replace
+    if (this.symbolMasters.length == 1) {
+      this.symbolLayer = this.askForLayerToReplace(this.symbolMasters[0]);
+
+      if (this.symbolLayer === false) {
+        return;
+      }
+    }
+
     // We're good to go...
     API.random(this.gender, this.minQuality)
       .then(json => {
@@ -45,125 +55,24 @@ class FillCurrentSelection {
   }
 
   fillWith(images, names) {
-    var layerOverride;
-    if (this.symbolMasters.length == 1) {
-      var layer = this.askForLayerToReplaceInSymbol(
-        this.symbolMasters[0],
-        context
-      );
-      layerOverride = layer;
-    }
-
     this.selectedLayers.forEach(layer => {
-      this.fillLayer(layer, images, names, layerOverride);
+      this.fillLayer(layer, images, names);
     });
-  }
-
-  askForLayerToReplaceInSymbol(master) {
-    let layersInMaster = master.children();
-    let filtered = filterLayersToOverrideable(layersInMaster);
-    let names = [];
-    for (var i = 0; i < filtered.length; i++) {
-      let name = filtered[i].name();
-      names.push(name);
-    }
-
-    var selection = sketch.UI.getSelectionFromUser(
-      "What layer would you like to fill with random data?",
-      names
-    );
-
-    var ok = selection[2];
-    var value = options[selection[1]];
-    if (ok) {
-      // do something
-    }
-  }
-
-  getFirstAndRemoveFromArray(array) {
-    var value = array.splice(0, 1)[0];
-    return value;
-  }
-
-  filterLayersToOverrideable(layers) {
-    var possible = [];
-
-    layers.forEach(layer => {
-      if (layer.type == "Text") {
-        possible.push(layer);
-      } else if (layer.type == "ShapePath") {
-        var fills = layer.style().fills();
-        if (fills[0].image()) {
-          possible.push(layer);
-        }
-      }
-    });
-
-    return possible;
   }
 
   fillLayer(layer, imagesArray, namesArray, layerOverride) {
     if (layer.type == "Text") {
       var name = this.getFirstAndRemoveFromArray(namesArray);
-      layer.stringValue = name;
+      layer.text = name;
     } else if (layer.type == "SymbolInstance") {
-      if (layerOverride) {
-        // update the mutable dictionary
-
+      if (this.symbolLayer) {
         if (layerOverride.type == "ShapePath") {
           var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
           var imageData = Helpers.imageData(imageURLString);
-
-          // Get existing overrides or make one if none exists
-          var newOverrides = layer.overrides();
-          if (newOverrides == null) {
-            newOverrides = {};
-          }
-
-          // Create mutable copy
-          var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(
-            newOverrides
-          );
-          mutableOverrides.setObject_forKey(
-            NSMutableDictionary.dictionaryWithDictionary(
-              newOverrides.objectForKey(0)
-            ),
-            0
-          );
-
-          // Change item in the overrides
-          mutableOverrides.setObject_forKey(
-            imageData,
-            layerOverride.objectID()
-          );
-
-          // Change overrides
-          layer.overrides = mutableOverrides;
+          layer.setOverrideValue(layerOverride, imageData);
         } else if (layerOverride.type == "Text") {
           var name = this.getFirstAndRemoveFromArray(namesArray);
-
-          // Get existing overrides or make one if none exists
-          var newOverrides = layer.overrides();
-          if (newOverrides == null) {
-            newOverrides = {};
-          }
-
-          // Create mutable copy
-          var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(
-            newOverrides
-          );
-          mutableOverrides.setObject_forKey(
-            NSMutableDictionary.dictionaryWithDictionary(
-              newOverrides.objectForKey(0)
-            ),
-            0
-          );
-
-          // Change item in the overrides
-          mutableOverrides.setObject_forKey(name, layerOverride.objectID());
-
-          // Change overrides
-          layer.overrides = mutableOverrides;
+          layer.setOverrideValue(layerOverride, name);
         }
       }
     } else if (layer.type == "ShapePath") {
@@ -182,7 +91,29 @@ class FillCurrentSelection {
     }
   }
 
+  // UI Actions
+
+  askForLayerToReplace(master) {
+    let overrideableLayers = Helpers.overrideableLayers(master.layers);
+    const names = overrideableLayers.map(layer => layer.name);
+
+    var selection = sketch.UI.getSelectionFromUser(
+      "What layer would you like to fill with random data?",
+      names
+    );
+
+    var ok = selection[2];
+    if (ok) {
+      return overrideableLayers[selection[1]];
+    }
+  }
+
   // Helpers
+
+  getFirstAndRemoveFromArray(array) {
+    var value = array.splice(0, 1)[0];
+    return value;
+  }
 
   namesAndImagesArrays(json) {
     var imagesArray = [];

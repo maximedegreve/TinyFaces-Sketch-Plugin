@@ -967,6 +967,7 @@ function () {
     var document = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.getSelectedDocument();
     this.selectedLayers = document.selectedLayers;
     this.symbolMasters = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].symbolMasters(this.selectedLayers);
+    this.symbolLayer = undefined;
   }
 
   _createClass(FillCurrentSelection, [{
@@ -984,6 +985,15 @@ function () {
       if (this.symbolMasters.length > 1) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.alert("You can't have different types of symbols selected when using this.", "Make sure you only have one type of symbol and try again.");
         return;
+      } // Ask what layer in the symbol you want to replace
+
+
+      if (this.symbolMasters.length == 1) {
+        this.symbolLayer = this.askForLayerToReplace(this.symbolMasters[0]);
+
+        if (this.symbolLayer === false) {
+          return;
+        }
       } // We're good to go...
 
 
@@ -1001,58 +1011,9 @@ function () {
     value: function fillWith(images, names) {
       var _this2 = this;
 
-      var layerOverride;
-
-      if (this.symbolMasters.length == 1) {
-        var layer = this.askForLayerToReplaceInSymbol(this.symbolMasters[0], context);
-        layerOverride = layer;
-      }
-
       this.selectedLayers.forEach(function (layer) {
-        _this2.fillLayer(layer, images, names, layerOverride);
+        _this2.fillLayer(layer, images, names);
       });
-    }
-  }, {
-    key: "askForLayerToReplaceInSymbol",
-    value: function askForLayerToReplaceInSymbol(master) {
-      var layersInMaster = master.children();
-      var filtered = filterLayersToOverrideable(layersInMaster);
-      var names = [];
-
-      for (var i = 0; i < filtered.length; i++) {
-        var name = filtered[i].name();
-        names.push(name);
-      }
-
-      var selection = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
-      var ok = selection[2];
-      var value = options[selection[1]];
-
-      if (ok) {// do something
-      }
-    }
-  }, {
-    key: "getFirstAndRemoveFromArray",
-    value: function getFirstAndRemoveFromArray(array) {
-      var value = array.splice(0, 1)[0];
-      return value;
-    }
-  }, {
-    key: "filterLayersToOverrideable",
-    value: function filterLayersToOverrideable(layers) {
-      var possible = [];
-      layers.forEach(function (layer) {
-        if (layer.type == "Text") {
-          possible.push(layer);
-        } else if (layer.type == "ShapePath") {
-          var fills = layer.style().fills();
-
-          if (fills[0].image()) {
-            possible.push(layer);
-          }
-        }
-      });
-      return possible;
     }
   }, {
     key: "fillLayer",
@@ -1061,43 +1022,16 @@ function () {
 
       if (layer.type == "Text") {
         var name = this.getFirstAndRemoveFromArray(namesArray);
-        layer.stringValue = name;
+        layer.text = name;
       } else if (layer.type == "SymbolInstance") {
-        if (layerOverride) {
-          // update the mutable dictionary
+        if (this.symbolLayer) {
           if (layerOverride.type == "ShapePath") {
             var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
-            var imageData = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString); // Get existing overrides or make one if none exists
-
-            var newOverrides = layer.overrides();
-
-            if (newOverrides == null) {
-              newOverrides = {};
-            } // Create mutable copy
-
-
-            var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(newOverrides);
-            mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(newOverrides.objectForKey(0)), 0); // Change item in the overrides
-
-            mutableOverrides.setObject_forKey(imageData, layerOverride.objectID()); // Change overrides
-
-            layer.overrides = mutableOverrides;
+            var imageData = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString);
+            layer.setOverrideValue(layerOverride, imageData);
           } else if (layerOverride.type == "Text") {
-            var name = this.getFirstAndRemoveFromArray(namesArray); // Get existing overrides or make one if none exists
-
-            var newOverrides = layer.overrides();
-
-            if (newOverrides == null) {
-              newOverrides = {};
-            } // Create mutable copy
-
-
-            var mutableOverrides = NSMutableDictionary.dictionaryWithDictionary(newOverrides);
-            mutableOverrides.setObject_forKey(NSMutableDictionary.dictionaryWithDictionary(newOverrides.objectForKey(0)), 0); // Change item in the overrides
-
-            mutableOverrides.setObject_forKey(name, layerOverride.objectID()); // Change overrides
-
-            layer.overrides = mutableOverrides;
+            var name = this.getFirstAndRemoveFromArray(namesArray);
+            layer.setOverrideValue(layerOverride, name);
           }
         }
       } else if (layer.type == "ShapePath") {
@@ -1111,8 +1045,29 @@ function () {
           _this3.fillLayer(layer, imagesArray, namesArray);
         });
       }
+    } // UI Actions
+
+  }, {
+    key: "askForLayerToReplace",
+    value: function askForLayerToReplace(master) {
+      var overrideableLayers = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].overrideableLayers(master.layers);
+      var names = overrideableLayers.map(function (layer) {
+        return layer.name;
+      });
+      var selection = sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.getSelectionFromUser("What layer would you like to fill with random data?", names);
+      var ok = selection[2];
+
+      if (ok) {
+        return overrideableLayers[selection[1]];
+      }
     } // Helpers
 
+  }, {
+    key: "getFirstAndRemoveFromArray",
+    value: function getFirstAndRemoveFromArray(array) {
+      var value = array.splice(0, 1)[0];
+      return value;
+    }
   }, {
     key: "namesAndImagesArrays",
     value: function namesAndImagesArrays(json) {
@@ -1175,16 +1130,35 @@ function () {
       return imageData;
     }
   }, {
+    key: "overrideableLayers",
+    value: function overrideableLayers(layers) {
+      return layers.filter(function (layer) {
+        if (layer.type == "Text") {
+          return true;
+        }
+
+        if (layer.type == "ShapePath" && layer.style.fills[0].image) {
+          return true;
+        }
+
+        return false;
+      });
+    }
+  }, {
     key: "symbolMasters",
     value: function symbolMasters(layers) {
       var masters = [];
       layers.forEach(function (layer) {
-        if (layer.type == "SymbolInstance") {
-          var master = layer.master;
+        if (layer.type !== "SymbolInstance") {
+          return;
+        }
 
-          if (masters.indexOf(master) === -1) {
-            masters.push(master);
-          }
+        var alreadyIncluded = masters.map(function (master) {
+          return master.symbolId;
+        }).includes(layer.symbolId);
+
+        if (alreadyIncluded === false) {
+          masters.push(layer.master);
         }
       });
       return masters;
