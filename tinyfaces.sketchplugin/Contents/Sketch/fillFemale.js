@@ -988,10 +988,10 @@ function () {
       } // Ask what layer in the symbol you want to replace
 
 
-      if (this.symbolMasters.length == 1) {
+      if (this.symbolMasters.length >= 1) {
         this.symbolLayer = this.askForLayerToReplace(this.symbolMasters[0]);
 
-        if (this.symbolLayer === false) {
+        if (this.symbolLayer === undefined) {
           return;
         }
       } // We're good to go...
@@ -1010,27 +1010,13 @@ function () {
     }
   }, {
     key: "fillLayer",
-    value: function fillLayer(layer, imagesArray, namesArray, layerOverride) {
+    value: function fillLayer(layer, imagesArray, namesArray) {
       var _this2 = this;
 
       // Text
       if (layer.type == "Text") {
         var name = this.getFirstAndRemoveFromArray(namesArray);
         layer.text = name;
-      } // Symbols
-
-
-      if (layer.type == "SymbolInstance") {
-        if (this.symbolLayer) {
-          if (layerOverride.type == "ShapePath") {
-            var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
-            var imageData = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString);
-            layer.setOverrideValue(layerOverride, imageData);
-          } else if (layerOverride.type == "Text") {
-            var name = this.getFirstAndRemoveFromArray(namesArray);
-            layer.setOverrideValue(layerOverride, name);
-          }
-        }
       } // Shape
 
 
@@ -1044,9 +1030,27 @@ function () {
 
 
       if (layer.type == "Group") {
-        layer.layers().forEach(function (layer) {
+        layer.layers.forEach(function (layer) {
           _this2.fillLayer(layer, imagesArray, namesArray);
         });
+      } // Symbols
+
+
+      if (layer.type == "SymbolInstance") {
+        if (this.symbolLayer) {
+          var index = layer.overrides.findIndex(function (override) {
+            return override.path == _this2.symbolLayer.id;
+          });
+
+          if (this.symbolLayer.type == "ShapePath") {
+            var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
+            var imageData = _helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString);
+            layer.setOverrideValue(layer.overrides[index], imageData);
+          } else if (this.symbolLayer.type == "Text") {
+            var name = this.getFirstAndRemoveFromArray(namesArray);
+            layer.setOverrideValue(layer.overrides[index], name);
+          }
+        }
       }
     } // UI Actions
 
@@ -1140,7 +1144,7 @@ function () {
           return true;
         }
 
-        if (layer.type == "ShapePath" && layer.style.fills[0].image) {
+        if (layer.type == "ShapePath") {
           return true;
         }
 

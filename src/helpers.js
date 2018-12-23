@@ -21,7 +21,7 @@ class Helpers {
         return true;
       }
 
-      if (layer.type == "ShapePath" && layer.style.fills[0].image) {
+      if (layer.type == "ShapePath") {
         return true;
       }
 

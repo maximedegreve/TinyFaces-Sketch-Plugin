@@ -32,10 +32,9 @@ class FillCurrentSelection {
     }
 
     // Ask what layer in the symbol you want to replace
-    if (this.symbolMasters.length == 1) {
+    if (this.symbolMasters.length >= 1) {
       this.symbolLayer = this.askForLayerToReplace(this.symbolMasters[0]);
-
-      if (this.symbolLayer === false) {
+      if (this.symbolLayer === undefined) {
         return;
       }
     }
@@ -56,25 +55,13 @@ class FillCurrentSelection {
       });
   }
 
-  fillLayer(layer, imagesArray, namesArray, layerOverride) {
+  fillLayer(layer, imagesArray, namesArray) {
     // Text
     if (layer.type == "Text") {
       var name = this.getFirstAndRemoveFromArray(namesArray);
       layer.text = name;
     }
-    // Symbols
-    if (layer.type == "SymbolInstance") {
-      if (this.symbolLayer) {
-        if (layerOverride.type == "ShapePath") {
-          var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
-          var imageData = Helpers.imageData(imageURLString);
-          layer.setOverrideValue(layerOverride, imageData);
-        } else if (layerOverride.type == "Text") {
-          var name = this.getFirstAndRemoveFromArray(namesArray);
-          layer.setOverrideValue(layerOverride, name);
-        }
-      }
-    }
+
     // Shape
     if (layer.type == "ShapePath") {
       var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
@@ -89,9 +76,27 @@ class FillCurrentSelection {
 
     // Group
     if (layer.type == "Group") {
-      layer.layers().forEach(layer => {
+      layer.layers.forEach(layer => {
         this.fillLayer(layer, imagesArray, namesArray);
       });
+    }
+
+    // Symbols
+    if (layer.type == "SymbolInstance") {
+      if (this.symbolLayer) {
+        var index = layer.overrides.findIndex(override => {
+          return override.path == this.symbolLayer.id;
+        });
+
+        if (this.symbolLayer.type == "ShapePath") {
+          var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
+          var imageData = Helpers.imageData(imageURLString);
+          layer.setOverrideValue(layer.overrides[index], imageData);
+        } else if (this.symbolLayer.type == "Text") {
+          var name = this.getFirstAndRemoveFromArray(namesArray);
+          layer.setOverrideValue(layer.overrides[index], name);
+        }
+      }
     }
   }
 
