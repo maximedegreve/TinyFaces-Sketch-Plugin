@@ -1000,30 +1000,27 @@ function () {
       _api__WEBPACK_IMPORTED_MODULE_0__["default"].random(this.gender, this.minQuality).then(function (json) {
         var arrays = _this.namesAndImagesArrays(json);
 
-        _this.fillWith(arrays.images, arrays.names);
+        _this.selectedLayers.forEach(function (layer) {
+          _this.fillLayer(layer, arrays.images, arrays.names);
+        });
       }).catch(function (err) {
         sketch__WEBPACK_IMPORTED_MODULE_2___default.a.UI.message("⚠️ TinyFaces can't be contacted. Check your internet...");
         console.log(err);
       });
     }
   }, {
-    key: "fillWith",
-    value: function fillWith(images, names) {
-      var _this2 = this;
-
-      this.selectedLayers.forEach(function (layer) {
-        _this2.fillLayer(layer, images, names);
-      });
-    }
-  }, {
     key: "fillLayer",
     value: function fillLayer(layer, imagesArray, namesArray, layerOverride) {
-      var _this3 = this;
+      var _this2 = this;
 
+      // Text
       if (layer.type == "Text") {
         var name = this.getFirstAndRemoveFromArray(namesArray);
         layer.text = name;
-      } else if (layer.type == "SymbolInstance") {
+      } // Symbols
+
+
+      if (layer.type == "SymbolInstance") {
         if (this.symbolLayer) {
           if (layerOverride.type == "ShapePath") {
             var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
@@ -1034,15 +1031,21 @@ function () {
             layer.setOverrideValue(layerOverride, name);
           }
         }
-      } else if (layer.type == "ShapePath") {
+      } // Shape
+
+
+      if (layer.type == "ShapePath") {
         var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
         var fill = layer.sketchObject.style().fills().firstObject();
         fill.setFillType(4);
         fill.setImage(_helpers__WEBPACK_IMPORTED_MODULE_1__["default"].imageData(imageURLString));
         fill.setPatternFillType(1);
-      } else if (layer.type == "Group") {
+      } // Group
+
+
+      if (layer.type == "Group") {
         layer.layers().forEach(function (layer) {
-          _this3.fillLayer(layer, imagesArray, namesArray);
+          _this2.fillLayer(layer, imagesArray, namesArray);
         });
       }
     } // UI Actions

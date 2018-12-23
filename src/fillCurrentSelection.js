@@ -44,7 +44,9 @@ class FillCurrentSelection {
     API.random(this.gender, this.minQuality)
       .then(json => {
         const arrays = this.namesAndImagesArrays(json);
-        this.fillWith(arrays.images, arrays.names);
+        this.selectedLayers.forEach(layer => {
+          this.fillLayer(layer, arrays.images, arrays.names);
+        });
       })
       .catch(function(err) {
         sketch.UI.message(
@@ -54,17 +56,14 @@ class FillCurrentSelection {
       });
   }
 
-  fillWith(images, names) {
-    this.selectedLayers.forEach(layer => {
-      this.fillLayer(layer, images, names);
-    });
-  }
-
   fillLayer(layer, imagesArray, namesArray, layerOverride) {
+    // Text
     if (layer.type == "Text") {
       var name = this.getFirstAndRemoveFromArray(namesArray);
       layer.text = name;
-    } else if (layer.type == "SymbolInstance") {
+    }
+    // Symbols
+    if (layer.type == "SymbolInstance") {
       if (this.symbolLayer) {
         if (layerOverride.type == "ShapePath") {
           var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
@@ -75,7 +74,9 @@ class FillCurrentSelection {
           layer.setOverrideValue(layerOverride, name);
         }
       }
-    } else if (layer.type == "ShapePath") {
+    }
+    // Shape
+    if (layer.type == "ShapePath") {
       var imageURLString = this.getFirstAndRemoveFromArray(imagesArray);
       let fill = layer.sketchObject
         .style()
@@ -84,7 +85,10 @@ class FillCurrentSelection {
       fill.setFillType(4);
       fill.setImage(Helpers.imageData(imageURLString));
       fill.setPatternFillType(1);
-    } else if (layer.type == "Group") {
+    }
+
+    // Group
+    if (layer.type == "Group") {
       layer.layers().forEach(layer => {
         this.fillLayer(layer, imagesArray, namesArray);
       });
