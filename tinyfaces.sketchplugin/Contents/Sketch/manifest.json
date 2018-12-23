@@ -1,0 +1,54 @@
+{
+    "name": "TinyFaces 👦🏼👨🏾👩🏻",
+    "description": "Fill content with random avatars & data",
+    "author": "Maxime De Greve",
+    "homepage": "https://tinyfac.es",
+    "version": 2.4,
+    "identifier": "com.maximedegreve.tinyfaces",
+    "updateURL": "https://github.com/downloads/example/sketchplugins/sketchplugins.json",
+    "compatibleVersion": 3,
+    "bundleVersion": 1,
+    "appcast": "https://raw.githubusercontent.com/maximedegreve/TinyFaces-Sketch-Plugin/master/update/appcast.xml",
+    "commands" : [
+      {
+      "name" : "Fill with high quality...",
+      "identifier" : "fillhigh",
+      "shortcut" : "ctrl shift a",
+      "script" : "fill.js",
+      "handler" : "onRun"
+      },{
+      "name" : "Fill with low quality...",
+      "identifier" : "filllow",
+      "shortcut" : "ctrl shift t",
+      "script" : "fill.js",
+      "handler" : "onRun"
+      },{
+      "name" : "Fill with female...",
+      "identifier" : "fillfemale",
+      "shortcut" : "ctrl shift f",
+      "script" : "fill.js",
+      "handler" : "onRun"
+      },{
+      "name" : "Fill with male...",
+      "identifier" : "fillmale",
+      "shortcut" : "ctrl shift m",
+      "script" : "fill.js",
+      "handler" : "onRun"
+      }
+                ],
+    "menu" : {
+        "title": "TinyFaces 👦🏼👨🏾👩🏻",
+        "isRoot": false,
+        "items": [
+          "fillhigh",
+          "filllow",
+          {
+                "title": "Filtered",
+                "items": [
+                    "fillmale",
+                    "fillfemale"
+                ]
+            }
+        ]
+    }
+}
