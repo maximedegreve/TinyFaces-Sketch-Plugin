@@ -5,13 +5,13 @@
   "identifier": "com.maximedegreve.tinyfaces",
   "commands": [
     {
-      "name": "Fill with high quality...",
+      "name": "Fill with high quality... (less variation)",
       "identifier": "fillhigh",
       "shortcut": "ctrl shift a",
       "script": "./menu/fillHigh.js"
     },
     {
-      "name": "Fill with low quality...",
+      "name": "Fill with low quality... (more variation)",
       "identifier": "filllow",
       "shortcut": "ctrl shift t",
       "script": "./menu/fillLow.js"

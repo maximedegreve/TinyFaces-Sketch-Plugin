@@ -129,7 +129,7 @@ class FillCurrentSelection {
     var namesArray = [];
 
     json.forEach(item => {
-      var imageURL = item.avatars[2].url;
+      var imageURL = item.url;
       imagesArray.push(imageURL);
       var name = item.first_name + " " + item.last_name;
       namesArray.push(name);

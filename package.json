@@ -25,7 +25,7 @@
     "postinstall": "npm run build && skpm-link"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.5.11"
+    "@skpm/builder": "^0.7.11"
   },
   "author": "Maxime De Greve <maximedegreve@me.com>",
   "license": "MIT"

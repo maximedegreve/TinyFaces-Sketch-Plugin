@@ -5,28 +5,28 @@
   "identifier": "com.maximedegreve.tinyfaces",
   "commands": [
     {
-      "name": "Fill with high quality...",
+      "name": "Fill with high quality... (less variation)",
       "identifier": "fillhigh",
       "shortcut": "ctrl shift a",
-      "script": "fillHigh.js"
+      "script": "__menu_fillHigh.js"
     },
     {
-      "name": "Fill with low quality...",
+      "name": "Fill with low quality... (more variation)",
       "identifier": "filllow",
       "shortcut": "ctrl shift t",
-      "script": "fillLow.js"
+      "script": "__menu_fillLow.js"
     },
     {
       "name": "Fill with female...",
       "identifier": "fillfemale",
       "shortcut": "ctrl shift f",
-      "script": "fillFemale.js"
+      "script": "__menu_fillFemale.js"
     },
     {
       "name": "Fill with male...",
       "identifier": "fillmale",
       "shortcut": "ctrl shift m",
-      "script": "fillMale.js"
+      "script": "__menu_fillMale.js"
     }
   ],
   "menu": {

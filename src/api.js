@@ -1,7 +1,7 @@
 class API {
   static random(gender, min_quality) {
-    const apiURL = "https://tinyfac.es/api/users/";
-    var query = "?min_quality=" + min_quality;
+    const apiURL = "https://tinyfac.es/api/data/";
+    var query = "?quality=" + min_quality;
 
     if (gender) {
       query = query + "&gender=" + gender;
