@@ -17,7 +17,7 @@ Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyf
 - Un-zip
 - Double-click on tinyfaces.sketchplugin
 
-Check out how it works:
+**Check out how it works:**
 
 ![Screengrab](/assets/action.gif?raw=true)
 
