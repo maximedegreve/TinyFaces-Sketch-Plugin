@@ -2,7 +2,7 @@
 
 Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyfac.es/)...
 
-Features:
+**Features:**
 
 - 📒 Fills text layers with random names
 - 👦🏼 Fills shapes with random avatar stock photos
@@ -11,7 +11,7 @@ Features:
 - 🎚 Choose between high quality or low quality images
 - 💑 Filter to only male or female
 
-Installation:
+**Installation:**
 
 - [Download](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/releases/latest) the latest release of the plugin
 - Un-zip
