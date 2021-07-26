@@ -1,14 +1,21 @@
 # TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin
+
 Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyfac.es/)...
 
 Features:
 
-* 📒 Fills text layers with random names
-* 👦🏼 Fills shapes with random avatar stock photos
-* 👨‍👩‍👧‍👦 Supports groups
-* 💟 Supports symbols
-* 🎚 Choose between high quality or low quality images
-* 💑 Filter to only male or female
+- 📒 Fills text layers with random names
+- 👦🏼 Fills shapes with random avatar stock photos
+- 👨‍👩‍👧‍👦 Supports groups
+- 💟 Supports symbols
+- 🎚 Choose between high quality or low quality images
+- 💑 Filter to only male or female
+
+Installation:
+
+- [Download](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/releases/latest) the latest release of the plugin
+- Un-zip
+- Double-click on tinyfaces.sketchplugin
 
 Check out how it works:
 
@@ -50,9 +57,9 @@ npm run start
 
 To customize Babel, you have two options:
 
-* You may create a [`.babelrc`](https://babeljs.io/docs/usage/babelrc) file in your project's root directory. Any settings you define here will overwrite matching config-keys within skpm preset. For example, if you pass a "presets" object, it will replace & reset all Babel presets that skpm defaults to.
+- You may create a [`.babelrc`](https://babeljs.io/docs/usage/babelrc) file in your project's root directory. Any settings you define here will overwrite matching config-keys within skpm preset. For example, if you pass a "presets" object, it will replace & reset all Babel presets that skpm defaults to.
 
-* If you'd like to modify or add to the existing Babel config, you must use a `webpack.skpm.config.js` file. Visit the [Webpack](#webpack) section for more info.
+- If you'd like to modify or add to the existing Babel config, you must use a `webpack.skpm.config.js` file. Visit the [Webpack](#webpack) section for more info.
 
 ### Webpack
 
@@ -75,9 +82,9 @@ module.exports = function(config, isPluginCommand) {
 
 To view the output of your `console.log`, you have a few different options:
 
-* Use the [`sketch-dev-tools`](https://github.com/skpm/sketch-dev-tools)
-* Open `Console.app` and look for the sketch logs
-* Look at the `~/Library/Logs/com.bohemiancoding.sketch3/Plugin Output.log` file
+- Use the [`sketch-dev-tools`](https://github.com/skpm/sketch-dev-tools)
+- Open `Console.app` and look for the sketch logs
+- Look at the `~/Library/Logs/com.bohemiancoding.sketch3/Plugin Output.log` file
 
 Skpm provides a convenient way to do the latter:
 
