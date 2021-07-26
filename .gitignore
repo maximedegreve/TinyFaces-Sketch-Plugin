@@ -1,5 +1,5 @@
 # build artifacts
-plugin.sketchplugin
+tinyfaces.sketchplugin
 
 # npm
 node_modules
