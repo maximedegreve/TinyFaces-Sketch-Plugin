@@ -13,7 +13,7 @@ Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyf
 
 **Installation:**
 
-- [Download](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/releases/download/v0.6.0/TinyFaces.zip) the latest release of the plugin
+- [Download](https://github.com/maximedegreve/TinyFaces-Sketch-Plugin/releases/download/v0.6.2/tinyfaces.sketchplugin.zip) the latest release of the plugin
 - Un-zip
 - Double-click on tinyfaces.sketchplugin
 
