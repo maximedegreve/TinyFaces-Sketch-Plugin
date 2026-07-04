@@ -1,5 +1,11 @@
 # TinyFaces 👦🏼👨🏾👩🏻 Sketch Plugin
 
+> [!NOTE]
+> **This project has been archived.** TinyFaces is no longer maintained and the
+> service has been retired, since AI can now generate a unique face in seconds.
+> Thank you to everyone who used it and sent in their faces. The code remains
+> here for reference.
+
 Fill layers in Sketch with avatars & random data from [tinyfac.es](https://tinyfac.es/)...
 
 **Features:**
